@@ -1,0 +1,194 @@
+
+import { useState, useEffect } from "react";
+import { useParams, Link } from "react-router-dom";
+import { ArrowLeft, Download, Clock } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { Movie } from "@/types/Movie";
+import { Button } from "@/components/ui/button";
+import { toast } from "@/hooks/use-toast";
+
+const Download = () => {
+  const { id } = useParams<{ id: string }>();
+  const [movie, setMovie] = useState<Movie | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [countdown, setCountdown] = useState(5);
+  const [showDownloadButton, setShowDownloadButton] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const loadMovie = async () => {
+      if (!id) return;
+
+      try {
+        const { data: movieData, error: movieError } = await supabase
+          .from('movies')
+          .select('*')
+          .eq('id', id)
+          .single();
+
+        if (movieError) throw movieError;
+
+        const mappedMovie: Movie = {
+          id: movieData.id,
+          tmdb_id: movieData.tmdb_id,
+          title: movieData.title,
+          description: movieData.description,
+          image: movieData.image,
+          releaseDate: movieData.release_date,
+          isReleased: movieData.is_released,
+          category: movieData.category,
+          rating: movieData.rating
+        };
+
+        setMovie(mappedMovie);
+      } catch (error) {
+        console.error('Error loading movie:', error);
+        setError('Failed to load movie');
+        toast({
+          title: "Error",
+          description: "Failed to load movie details.",
+          variant: "destructive"
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadMovie();
+  }, [id]);
+
+  useEffect(() => {
+    if (countdown > 0) {
+      const timer = setTimeout(() => {
+        setCountdown(countdown - 1);
+      }, 1000);
+      return () => clearTimeout(timer);
+    } else {
+      setShowDownloadButton(true);
+    }
+  }, [countdown]);
+
+  const handleDownload = () => {
+    if (!movie) return;
+    
+    // Diskwala download link format - you can modify this based on actual Diskwala API
+    const diskwalaLink = `https://diskwala.com/download/${movie.title.replace(/\s+/g, '-').toLowerCase()}`;
+    
+    // Open download link in new tab
+    window.open(diskwalaLink, '_blank');
+    
+    toast({
+      title: "Download Started",
+      description: `${movie.title} download has been initiated.`,
+    });
+  };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-900 text-white flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-yellow-400 mx-auto mb-4"></div>
+          <p className="text-xl">Loading movie details...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error || !movie) {
+    return (
+      <div className="min-h-screen bg-gray-900 text-white flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-xl text-red-400 mb-4">{error || 'Movie not found'}</p>
+          <Link to="/">
+            <Button className="bg-yellow-400 text-black hover:bg-yellow-300">
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Back to Home
+            </Button>
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gray-900 text-white">
+      <div className="container mx-auto px-4 py-8">
+        <Link to={`/movie/${movie.id}`}>
+          <Button 
+            variant="outline" 
+            className="mb-8 bg-black bg-opacity-50 border-gray-600 text-white hover:bg-black hover:bg-opacity-75"
+          >
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Back to Movie Details
+          </Button>
+        </Link>
+
+        <div className="max-w-2xl mx-auto text-center">
+          <div className="mb-8">
+            <img 
+              src={movie.image} 
+              alt={movie.title}
+              className="w-64 h-auto mx-auto rounded-lg shadow-2xl mb-6"
+              onError={(e) => {
+                const target = e.target as HTMLImageElement;
+                target.src = "https://images.unsplash.com/photo-1518676590629-3dcbd9c5a5c9?w=500";
+              }}
+            />
+            <h1 className="text-4xl font-bold mb-4">{movie.title}</h1>
+            <p className="text-gray-400 text-lg">{movie.description}</p>
+          </div>
+
+          {!showDownloadButton ? (
+            <div className="bg-gray-800 rounded-lg p-8 mb-8">
+              <div className="flex items-center justify-center mb-6">
+                <Clock className="w-8 h-8 text-yellow-400 mr-3" />
+                <h2 className="text-2xl font-semibold">Preparing Download</h2>
+              </div>
+              
+              <div className="text-6xl font-bold text-yellow-400 mb-4">
+                {countdown}
+              </div>
+              
+              <p className="text-gray-400">
+                Please wait while we prepare your download link...
+              </p>
+              
+              <div className="w-full bg-gray-700 rounded-full h-2 mt-6">
+                <div 
+                  className="bg-yellow-400 h-2 rounded-full transition-all duration-1000"
+                  style={{ width: `${((5 - countdown) / 5) * 100}%` }}
+                ></div>
+              </div>
+            </div>
+          ) : (
+            <div className="bg-gray-800 rounded-lg p-8">
+              <h2 className="text-2xl font-semibold mb-6 text-green-400">
+                Ready to Download!
+              </h2>
+              
+              <Button 
+                onClick={handleDownload}
+                className="bg-red-600 hover:bg-red-700 text-white px-8 py-4 text-xl"
+                size="lg"
+              >
+                <Download className="w-6 h-6 mr-3" />
+                Download Now
+              </Button>
+              
+              <p className="text-gray-400 mt-4 text-sm">
+                Clicking will open the download link from Diskwala
+              </p>
+            </div>
+          )}
+
+          <div className="mt-8 text-sm text-gray-500">
+            <p>⚠️ Please ensure you have a stable internet connection</p>
+            <p>📁 Download will be saved to your default downloads folder</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default Download;

@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
-import { Calendar, Star, ArrowLeft, Clock, User } from "lucide-react";
+import { Calendar, Star, ArrowLeft, Clock, Download } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Movie } from "@/types/Movie";
 import { Button } from "@/components/ui/button";
@@ -48,7 +48,20 @@ const MovieDetails = () => {
 
         if (movieError) throw movieError;
 
-        setMovie(movieData);
+        // Map database fields to Movie type
+        const mappedMovie: Movie = {
+          id: movieData.id,
+          tmdb_id: movieData.tmdb_id,
+          title: movieData.title,
+          description: movieData.description,
+          image: movieData.image,
+          releaseDate: movieData.release_date,
+          isReleased: movieData.is_released,
+          category: movieData.category,
+          rating: movieData.rating
+        };
+
+        setMovie(mappedMovie);
 
         // If we have a TMDB ID, fetch detailed information
         if (movieData.tmdb_id) {
@@ -102,9 +115,8 @@ const MovieDetails = () => {
     );
   }
 
-  const details = movieDetails || {};
-  const backdropUrl = details.backdrop_path 
-    ? `https://image.tmdb.org/t/p/w1280${details.backdrop_path}`
+  const backdropUrl = movieDetails?.backdrop_path 
+    ? `https://image.tmdb.org/t/p/w1280${movieDetails.backdrop_path}`
     : movie.image;
 
   return (
@@ -147,8 +159,8 @@ const MovieDetails = () => {
           {/* Details */}
           <div className="flex-1">
             <h1 className="text-4xl font-bold mb-2">{movie.title}</h1>
-            {details.tagline && (
-              <p className="text-xl text-gray-400 italic mb-4">{details.tagline}</p>
+            {movieDetails?.tagline && (
+              <p className="text-xl text-gray-400 italic mb-4">{movieDetails.tagline}</p>
             )}
 
             {/* Rating and Release Info */}
@@ -157,8 +169,8 @@ const MovieDetails = () => {
                 <div className="flex items-center">
                   <Star className="w-5 h-5 text-yellow-400 fill-current mr-2" />
                   <span className="text-lg font-semibold">{movie.rating}</span>
-                  {details.vote_count && (
-                    <span className="text-gray-400 ml-1">({details.vote_count} votes)</span>
+                  {movieDetails?.vote_count && (
+                    <span className="text-gray-400 ml-1">({movieDetails.vote_count} votes)</span>
                   )}
                 </div>
               )}
@@ -168,10 +180,10 @@ const MovieDetails = () => {
                 <span>{new Date(movie.releaseDate).getFullYear()}</span>
               </div>
 
-              {details.runtime && (
+              {movieDetails?.runtime && (
                 <div className="flex items-center">
                   <Clock className="w-5 h-5 text-gray-400 mr-2" />
-                  <span>{Math.floor(details.runtime / 60)}h {details.runtime % 60}m</span>
+                  <span>{Math.floor(movieDetails.runtime / 60)}h {movieDetails.runtime % 60}m</span>
                 </div>
               )}
 
@@ -184,12 +196,22 @@ const MovieDetails = () => {
               </span>
             </div>
 
+            {/* Download Button */}
+            <div className="mb-6">
+              <Link to={`/download/${movie.id}`}>
+                <Button className="bg-red-600 hover:bg-red-700 text-white px-6 py-3 text-lg">
+                  <Download className="w-5 h-5 mr-2" />
+                  Download Movie
+                </Button>
+              </Link>
+            </div>
+
             {/* Genres */}
-            {details.genres && details.genres.length > 0 && (
+            {movieDetails?.genres && movieDetails.genres.length > 0 && (
               <div className="mb-6">
                 <h3 className="text-lg font-semibold mb-2">Genres</h3>
                 <div className="flex flex-wrap gap-2">
-                  {details.genres.map((genre) => (
+                  {movieDetails.genres.map((genre) => (
                     <span 
                       key={genre.id}
                       className="bg-purple-600 text-white px-3 py-1 rounded text-sm"
@@ -208,19 +230,19 @@ const MovieDetails = () => {
             </div>
 
             {/* Status */}
-            {details.status && (
+            {movieDetails?.status && (
               <div className="mb-6">
                 <h3 className="text-lg font-semibold mb-2">Status</h3>
-                <p className="text-gray-300">{details.status}</p>
+                <p className="text-gray-300">{movieDetails.status}</p>
               </div>
             )}
 
             {/* Cast */}
-            {details.cast && details.cast.length > 0 && (
+            {movieDetails?.cast && movieDetails.cast.length > 0 && (
               <div className="mb-6">
                 <h3 className="text-lg font-semibold mb-4">Cast</h3>
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                  {details.cast.slice(0, 8).map((actor) => (
+                  {movieDetails.cast.slice(0, 8).map((actor) => (
                     <div key={actor.id} className="text-center">
                       <img
                         src={actor.profile_path 
@@ -239,11 +261,11 @@ const MovieDetails = () => {
             )}
 
             {/* Production Companies */}
-            {details.production_companies && details.production_companies.length > 0 && (
+            {movieDetails?.production_companies && movieDetails.production_companies.length > 0 && (
               <div>
                 <h3 className="text-lg font-semibold mb-4">Production Companies</h3>
                 <div className="flex flex-wrap gap-4">
-                  {details.production_companies.map((company) => (
+                  {movieDetails.production_companies.map((company) => (
                     <div key={company.id} className="flex items-center bg-gray-800 rounded-lg p-3">
                       {company.logo_path && (
                         <img
