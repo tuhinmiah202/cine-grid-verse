@@ -1,47 +1,111 @@
 
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { ArrowLeft, Film } from "lucide-react";
+import { ArrowLeft, Film, Database } from "lucide-react";
 import { AdminForm } from "@/components/AdminForm";
 import { AdminMovieList } from "@/components/AdminMovieList";
+import { TMDBSearch } from "@/components/TMDBSearch";
 import { Movie } from "@/types/Movie";
 import { toast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 const Admin = () => {
   const [movies, setMovies] = useState<Movie[]>([]);
+  const [activeTab, setActiveTab] = useState<'tmdb' | 'manual'>('tmdb');
 
-  useEffect(() => {
-    const storedMovies = localStorage.getItem("movies");
-    if (storedMovies) {
-      setMovies(JSON.parse(storedMovies));
+  const loadMovies = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('movies')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+
+      const formattedMovies: Movie[] = data.map(movie => ({
+        id: movie.id,
+        tmdb_id: movie.tmdb_id,
+        title: movie.title,
+        description: movie.description || "",
+        image: movie.image || "",
+        releaseDate: movie.release_date || "",
+        isReleased: movie.is_released ?? true,
+        category: movie.category || "",
+        rating: movie.rating
+      }));
+
+      setMovies(formattedMovies);
+    } catch (error) {
+      console.error('Error loading movies:', error);
+      toast({
+        title: "Error",
+        description: "Failed to load movies from database.",
+        variant: "destructive"
+      });
     }
-  }, []);
-
-  const addMovie = (newMovie: Omit<Movie, "id">) => {
-    const movie: Movie = {
-      ...newMovie,
-      id: Date.now().toString()
-    };
-    
-    const updatedMovies = [...movies, movie];
-    setMovies(updatedMovies);
-    localStorage.setItem("movies", JSON.stringify(updatedMovies));
-    
-    toast({
-      title: "Success",
-      description: "Movie added successfully!",
-    });
   };
 
-  const deleteMovie = (id: string) => {
-    const updatedMovies = movies.filter(movie => movie.id !== id);
-    setMovies(updatedMovies);
-    localStorage.setItem("movies", JSON.stringify(updatedMovies));
-    
-    toast({
-      title: "Success",
-      description: "Movie deleted successfully!",
-    });
+  useEffect(() => {
+    loadMovies();
+  }, []);
+
+  const addMovie = async (newMovie: Omit<Movie, "id">) => {
+    try {
+      const movieData = {
+        title: newMovie.title,
+        description: newMovie.description,
+        image: newMovie.image || "https://images.unsplash.com/photo-1518676590629-3dcbd9c5a5c9?w=500",
+        release_date: newMovie.releaseDate,
+        is_released: newMovie.isReleased,
+        category: newMovie.category,
+        rating: newMovie.rating
+      };
+
+      const { error } = await supabase
+        .from('movies')
+        .insert([movieData]);
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: "Movie added successfully!",
+      });
+
+      loadMovies();
+    } catch (error) {
+      console.error('Error adding movie:', error);
+      toast({
+        title: "Error",
+        description: "Failed to add movie.",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const deleteMovie = async (id: string) => {
+    try {
+      const { error } = await supabase
+        .from('movies')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: "Movie deleted successfully!",
+      });
+
+      loadMovies();
+    } catch (error) {
+      console.error('Error deleting movie:', error);
+      toast({
+        title: "Error",
+        description: "Failed to delete movie.",
+        variant: "destructive"
+      });
+    }
   };
 
   return (
@@ -65,8 +129,41 @@ const Admin = () => {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           <div>
-            <h2 className="text-2xl font-bold mb-6">Add New Movie/Series</h2>
-            <AdminForm onAddMovie={addMovie} />
+            <div className="flex items-center mb-6">
+              <Database className="w-6 h-6 text-yellow-400 mr-2" />
+              <h2 className="text-2xl font-bold">Add Movies/Series</h2>
+            </div>
+            
+            <div className="flex mb-4 bg-gray-800 rounded-lg p-1">
+              <button
+                onClick={() => setActiveTab('tmdb')}
+                className={`flex-1 py-2 px-4 rounded-md font-medium transition-colors ${
+                  activeTab === 'tmdb'
+                    ? 'bg-yellow-400 text-black'
+                    : 'text-gray-400 hover:text-white'
+                }`}
+              >
+                Search TMDB
+              </button>
+              <button
+                onClick={() => setActiveTab('manual')}
+                className={`flex-1 py-2 px-4 rounded-md font-medium transition-colors ${
+                  activeTab === 'manual'
+                    ? 'bg-yellow-400 text-black'
+                    : 'text-gray-400 hover:text-white'
+                }`}
+              >
+                Manual Entry
+              </button>
+            </div>
+
+            {activeTab === 'tmdb' ? (
+              <div className="bg-gray-800 p-6 rounded-lg">
+                <TMDBSearch onMovieAdded={loadMovies} />
+              </div>
+            ) : (
+              <AdminForm onAddMovie={addMovie} />
+            )}
           </div>
           
           <div>

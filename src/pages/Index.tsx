@@ -6,58 +6,90 @@ import { Hero } from "@/components/Hero";
 import { SearchBar } from "@/components/SearchBar";
 import { Footer } from "@/components/Footer";
 import { Movie } from "@/types/Movie";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "@/hooks/use-toast";
 
 const Index = () => {
   const [movies, setMovies] = useState<Movie[]>([]);
   const [filteredMovies, setFilteredMovies] = useState<Movie[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string>("All");
   const [searchQuery, setSearchQuery] = useState<string>("");
+  const [isLoading, setIsLoading] = useState(true);
 
-  // Load movies from localStorage on component mount
+  // Load movies from Supabase
   useEffect(() => {
-    const storedMovies = localStorage.getItem("movies");
-    if (storedMovies) {
-      const parsedMovies = JSON.parse(storedMovies);
-      setMovies(parsedMovies);
-      setFilteredMovies(parsedMovies);
-    } else {
-      // Initialize with some sample movies
-      const sampleMovies: Movie[] = [
-        {
-          id: "1",
-          title: "Avengers: Endgame",
-          description: "The Avengers assemble once more to reverse Thanos' actions and restore balance to the universe.",
-          image: "https://images.unsplash.com/photo-1626814026160-2237a95fc5a0?w=500",
-          releaseDate: "2019-04-26",
-          isReleased: true,
-          category: "Action",
-          rating: 8.4
-        },
-        {
-          id: "2",
-          title: "The Matrix",
-          description: "A computer programmer discovers reality as he knows it is actually a simulation.",
-          image: "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=500",
-          releaseDate: "1999-03-31",
-          isReleased: true,
-          category: "Sci-Fi",
-          rating: 8.7
-        },
-        {
-          id: "3",
-          title: "Inception",
-          description: "A thief who enters people's dreams to steal secrets from their subconscious.",
-          image: "https://images.unsplash.com/photo-1542204165-65bf26472b9b?w=500",
-          releaseDate: "2010-07-16",
-          isReleased: true,
-          category: "Thriller",
-          rating: 8.8
-        }
-      ];
-      setMovies(sampleMovies);
-      setFilteredMovies(sampleMovies);
-      localStorage.setItem("movies", JSON.stringify(sampleMovies));
-    }
+    const loadMovies = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('movies')
+          .select('*')
+          .order('created_at', { ascending: false });
+
+        if (error) throw error;
+
+        const formattedMovies: Movie[] = data.map(movie => ({
+          id: movie.id,
+          tmdb_id: movie.tmdb_id,
+          title: movie.title,
+          description: movie.description || "",
+          image: movie.image || "",
+          releaseDate: movie.release_date || "",
+          isReleased: movie.is_released ?? true,
+          category: movie.category || "",
+          rating: movie.rating
+        }));
+
+        setMovies(formattedMovies);
+        setFilteredMovies(formattedMovies);
+      } catch (error) {
+        console.error('Error loading movies:', error);
+        toast({
+          title: "Error",
+          description: "Failed to load movies from database.",
+          variant: "destructive"
+        });
+        
+        // Fallback to sample movies if database fails
+        const sampleMovies: Movie[] = [
+          {
+            id: "1",
+            title: "Avengers: Endgame",
+            description: "The Avengers assemble once more to reverse Thanos' actions and restore balance to the universe.",
+            image: "https://images.unsplash.com/photo-1626814026160-2237a95fc5a0?w=500",
+            releaseDate: "2019-04-26",
+            isReleased: true,
+            category: "Action",
+            rating: 8.4
+          },
+          {
+            id: "2",
+            title: "The Matrix",
+            description: "A computer programmer discovers reality as he knows it is actually a simulation.",
+            image: "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=500",
+            releaseDate: "1999-03-31",
+            isReleased: true,
+            category: "Sci-Fi",
+            rating: 8.7
+          },
+          {
+            id: "3",
+            title: "Inception",
+            description: "A thief who enters people's dreams to steal secrets from their subconscious.",
+            image: "https://images.unsplash.com/photo-1542204165-65bf26472b9b?w=500",
+            releaseDate: "2010-07-16",
+            isReleased: true,
+            category: "Thriller",
+            rating: 8.8
+          }
+        ];
+        setMovies(sampleMovies);
+        setFilteredMovies(sampleMovies);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadMovies();
   }, []);
 
   // Filter movies based on category and search query
@@ -79,6 +111,17 @@ const Index = () => {
   }, [movies, selectedCategory, searchQuery]);
 
   const categories = ["All", ...Array.from(new Set(movies.map(movie => movie.category)))];
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-900 text-white flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-yellow-400 mx-auto mb-4"></div>
+          <p className="text-xl">Loading movies...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-900 text-white">

@@ -9,7 +9,48 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      movies: {
+        Row: {
+          category: string | null
+          created_at: string
+          description: string | null
+          id: string
+          image: string | null
+          is_released: boolean | null
+          rating: number | null
+          release_date: string | null
+          title: string
+          tmdb_id: number | null
+          updated_at: string
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          image?: string | null
+          is_released?: boolean | null
+          rating?: number | null
+          release_date?: string | null
+          title: string
+          tmdb_id?: number | null
+          updated_at?: string
+        }
+        Update: {
+          category?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          image?: string | null
+          is_released?: boolean | null
+          rating?: number | null
+          release_date?: string | null
+          title?: string
+          tmdb_id?: number | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
