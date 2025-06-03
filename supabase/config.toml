@@ -3,3 +3,6 @@ project_id = "yuqxwhfzuhxvukcnmdgk"
 
 [functions.tmdb-search]
 verify_jwt = false
+
+[functions.tmdb-details]
+verify_jwt = false
