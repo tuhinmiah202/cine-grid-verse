@@ -9,6 +9,38 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      movie_links: {
+        Row: {
+          created_at: string
+          download_url: string
+          id: string
+          movie_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          download_url: string
+          id?: string
+          movie_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          download_url?: string
+          id?: string
+          movie_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "movie_links_movie_id_fkey"
+            columns: ["movie_id"]
+            isOneToOne: false
+            referencedRelation: "movies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       movies: {
         Row: {
           category: string | null

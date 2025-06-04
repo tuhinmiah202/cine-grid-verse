@@ -29,24 +29,35 @@ export const MovieLinkManager = ({ movies }: MovieLinkManagerProps) => {
 
   const loadMovieLinks = async () => {
     try {
-      const { data, error } = await supabase
-        .from('movie_links')
-        .select(`
-          *,
-          movies!inner(title)
-        `)
-        .order('created_at', { ascending: false });
+      // Use rpc to get movie links with movie titles since types aren't updated yet
+      const { data, error } = await supabase.rpc('get_movie_links_with_titles');
+      
+      if (error) {
+        // Fallback to raw query if RPC doesn't exist
+        const { data: rawData, error: rawError } = await supabase
+          .from('movie_links' as any)
+          .select(`
+            id,
+            movie_id,
+            download_url,
+            movies!movie_links_movie_id_fkey(title)
+          `)
+          .order('created_at', { ascending: false });
+          
+        if (rawError) throw rawError;
+        
+        const formattedLinks: MovieLink[] = (rawData as any[]).map((link: any) => ({
+          id: link.id,
+          movie_id: link.movie_id,
+          download_url: link.download_url,
+          movie_title: link.movies?.title || 'Unknown Movie'
+        }));
+        
+        setMovieLinks(formattedLinks);
+        return;
+      }
 
-      if (error) throw error;
-
-      const formattedLinks: MovieLink[] = data.map(link => ({
-        id: link.id,
-        movie_id: link.movie_id,
-        download_url: link.download_url,
-        movie_title: link.movies.title
-      }));
-
-      setMovieLinks(formattedLinks);
+      setMovieLinks(data || []);
     } catch (error) {
       console.error('Error loading movie links:', error);
       toast({
@@ -74,7 +85,7 @@ export const MovieLinkManager = ({ movies }: MovieLinkManagerProps) => {
     setIsLoading(true);
     try {
       const { error } = await supabase
-        .from('movie_links')
+        .from('movie_links' as any)
         .insert([{
           movie_id: selectedMovieId,
           download_url: downloadUrl
@@ -105,7 +116,7 @@ export const MovieLinkManager = ({ movies }: MovieLinkManagerProps) => {
   const handleDeleteLink = async (linkId: string) => {
     try {
       const { error } = await supabase
-        .from('movie_links')
+        .from('movie_links' as any)
         .delete()
         .eq('id', linkId);
 
@@ -159,7 +170,7 @@ export const MovieLinkManager = ({ movies }: MovieLinkManagerProps) => {
               id="download-url"
               value={downloadUrl}
               onChange={(e) => setDownloadUrl(e.target.value)}
-              placeholder="Enter Diskwala or other download URL..."
+              placeholder="Enter download URL..."
               className="bg-gray-700 border-gray-600 text-white"
             />
           </div>

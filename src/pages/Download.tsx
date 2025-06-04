@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
-import { ArrowLeft, Download, Clock } from "lucide-react";
+import { ArrowLeft, Download as DownloadIcon, Clock } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Movie } from "@/types/Movie";
 import { Button } from "@/components/ui/button";
@@ -10,6 +10,7 @@ import { toast } from "@/hooks/use-toast";
 const Download = () => {
   const { id } = useParams<{ id: string }>();
   const [movie, setMovie] = useState<Movie | null>(null);
+  const [downloadUrl, setDownloadUrl] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [countdown, setCountdown] = useState(5);
   const [showDownloadButton, setShowDownloadButton] = useState(false);
@@ -41,6 +42,17 @@ const Download = () => {
         };
 
         setMovie(mappedMovie);
+
+        // Try to get download link for this movie
+        const { data: linkData, error: linkError } = await supabase
+          .from('movie_links' as any)
+          .select('download_url')
+          .eq('movie_id', id)
+          .single();
+
+        if (!linkError && linkData) {
+          setDownloadUrl(linkData.download_url);
+        }
       } catch (error) {
         console.error('Error loading movie:', error);
         setError('Failed to load movie');
@@ -71,10 +83,20 @@ const Download = () => {
   const handleDownload = () => {
     if (!movie) return;
     
-    toast({
-      title: "Download Started",
-      description: `${movie.title} download has been initiated.`,
-    });
+    if (downloadUrl) {
+      // Open the actual download link
+      window.open(downloadUrl, '_blank');
+      toast({
+        title: "Download Started",
+        description: `${movie.title} download has been initiated.`,
+      });
+    } else {
+      toast({
+        title: "No Download Link",
+        description: "Download link is not available for this movie.",
+        variant: "destructive"
+      });
+    }
   };
 
   if (isLoading) {
@@ -160,17 +182,26 @@ const Download = () => {
                 Ready to Download!
               </h2>
               
-              <Button 
-                onClick={handleDownload}
-                className="bg-red-600 hover:bg-red-700 text-white px-8 py-4 text-xl"
-                size="lg"
-              >
-                <Download className="w-6 h-6 mr-3" />
-                Download Now
-              </Button>
+              {downloadUrl ? (
+                <Button 
+                  onClick={handleDownload}
+                  className="bg-red-600 hover:bg-red-700 text-white px-8 py-4 text-xl"
+                  size="lg"
+                >
+                  <DownloadIcon className="w-6 h-6 mr-3" />
+                  Download Now
+                </Button>
+              ) : (
+                <div className="text-center">
+                  <p className="text-yellow-400 mb-4">Download link not available</p>
+                  <p className="text-gray-400 text-sm">
+                    Please contact admin to add download link for this movie
+                  </p>
+                </div>
+              )}
               
               <p className="text-gray-400 mt-4 text-sm">
-                Download link will be provided based on admin configuration
+                {downloadUrl ? "Click to start download" : "Download link will be provided by admin"}
               </p>
             </div>
           )}
