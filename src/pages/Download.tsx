@@ -71,12 +71,6 @@ const Download = () => {
   const handleDownload = () => {
     if (!movie) return;
     
-    // Diskwala download link format - you can modify this based on actual Diskwala API
-    const diskwalaLink = `https://diskwala.com/download/${movie.title.replace(/\s+/g, '-').toLowerCase()}`;
-    
-    // Open download link in new tab
-    window.open(diskwalaLink, '_blank');
-    
     toast({
       title: "Download Started",
       description: `${movie.title} download has been initiated.`,
@@ -176,7 +170,7 @@ const Download = () => {
               </Button>
               
               <p className="text-gray-400 mt-4 text-sm">
-                Clicking will open the download link from Diskwala
+                Download link will be provided based on admin configuration
               </p>
             </div>
           )}

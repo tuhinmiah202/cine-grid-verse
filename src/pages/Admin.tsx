@@ -1,17 +1,18 @@
 
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { ArrowLeft, Film, Database } from "lucide-react";
+import { ArrowLeft, Film, Database, LinkIcon } from "lucide-react";
 import { AdminForm } from "@/components/AdminForm";
 import { AdminMovieList } from "@/components/AdminMovieList";
 import { TMDBSearch } from "@/components/TMDBSearch";
+import { MovieLinkManager } from "@/components/MovieLinkManager";
 import { Movie } from "@/types/Movie";
 import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 
 const Admin = () => {
   const [movies, setMovies] = useState<Movie[]>([]);
-  const [activeTab, setActiveTab] = useState<'tmdb' | 'manual'>('tmdb');
+  const [activeTab, setActiveTab] = useState<'tmdb' | 'manual' | 'links'>('tmdb');
 
   const loadMovies = async () => {
     try {
@@ -131,7 +132,7 @@ const Admin = () => {
           <div>
             <div className="flex items-center mb-6">
               <Database className="w-6 h-6 text-yellow-400 mr-2" />
-              <h2 className="text-2xl font-bold">Add Movies/Series</h2>
+              <h2 className="text-2xl font-bold">Manage Content</h2>
             </div>
             
             <div className="flex mb-4 bg-gray-800 rounded-lg p-1">
@@ -155,14 +156,31 @@ const Admin = () => {
               >
                 Manual Entry
               </button>
+              <button
+                onClick={() => setActiveTab('links')}
+                className={`flex-1 py-2 px-4 rounded-md font-medium transition-colors ${
+                  activeTab === 'links'
+                    ? 'bg-yellow-400 text-black'
+                    : 'text-gray-400 hover:text-white'
+                }`}
+              >
+                <LinkIcon className="w-4 h-4 mr-1 inline" />
+                Download Links
+              </button>
             </div>
 
-            {activeTab === 'tmdb' ? (
+            {activeTab === 'tmdb' && (
               <div className="bg-gray-800 p-6 rounded-lg">
                 <TMDBSearch onMovieAdded={loadMovies} />
               </div>
-            ) : (
+            )}
+
+            {activeTab === 'manual' && (
               <AdminForm onAddMovie={addMovie} />
+            )}
+
+            {activeTab === 'links' && (
+              <MovieLinkManager movies={movies} />
             )}
           </div>
           
