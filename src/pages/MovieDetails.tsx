@@ -1,7 +1,6 @@
-
 import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
-import { Calendar, Star, ArrowLeft, Clock, Download } from "lucide-react";
+import { Calendar, Star, ArrowLeft, Clock, Play } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Movie } from "@/types/Movie";
 import { Button } from "@/components/ui/button";
@@ -115,23 +114,15 @@ const MovieDetails = () => {
     );
   }
 
-  const backdropUrl = movieDetails?.backdrop_path 
-    ? `https://image.tmdb.org/t/p/w1280${movieDetails.backdrop_path}`
-    : movie.image;
-
   return (
     <div className="min-h-screen bg-gray-900 text-white">
-      {/* Hero Section with Backdrop */}
-      <div 
-        className="relative h-96 bg-cover bg-center"
-        style={{ backgroundImage: `url(${backdropUrl})` }}
-      >
-        <div className="absolute inset-0 bg-black bg-opacity-60" />
-        <div className="relative container mx-auto px-4 h-full flex items-end pb-8">
+      {/* Simplified header without backdrop */}
+      <div className="bg-gray-800 py-8">
+        <div className="container mx-auto px-4">
           <Link to="/">
             <Button 
               variant="outline" 
-              className="absolute top-8 left-8 bg-black bg-opacity-50 border-gray-600 text-white hover:bg-black hover:bg-opacity-75"
+              className="bg-black bg-opacity-50 border-gray-600 text-white hover:bg-black hover:bg-opacity-75"
             >
               <ArrowLeft className="w-4 h-4 mr-2" />
               Back
@@ -196,12 +187,12 @@ const MovieDetails = () => {
               </span>
             </div>
 
-            {/* Download Button */}
+            {/* Watch Now Button */}
             <div className="mb-6">
               <Link to={`/download/${movie.id}`}>
                 <Button className="bg-red-600 hover:bg-red-700 text-white px-6 py-3 text-lg">
-                  <Download className="w-5 h-5 mr-2" />
-                  Download Movie
+                  <Play className="w-5 h-5 mr-2" />
+                  Watch Now
                 </Button>
               </Link>
             </div>

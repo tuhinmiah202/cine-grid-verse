@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
-import { ArrowLeft, Download as DownloadIcon, Clock } from "lucide-react";
+import { ArrowLeft, Play, Clock } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Movie } from "@/types/Movie";
 import { Button } from "@/components/ui/button";
@@ -13,7 +13,7 @@ const Download = () => {
   const [downloadUrl, setDownloadUrl] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [countdown, setCountdown] = useState(5);
-  const [showDownloadButton, setShowDownloadButton] = useState(false);
+  const [showWatchButton, setShowWatchButton] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -45,7 +45,7 @@ const Download = () => {
 
         // Try to get download link for this movie
         const { data: linkData, error: linkError } = await supabase
-          .from('movie_links' as any)
+          .from('movie_links')
           .select('download_url')
           .eq('movie_id', id)
           .single();
@@ -70,30 +70,30 @@ const Download = () => {
   }, [id]);
 
   useEffect(() => {
-    if (countdown > 0) {
+    if (countdown > 0 && !isLoading) {
       const timer = setTimeout(() => {
         setCountdown(countdown - 1);
       }, 1000);
       return () => clearTimeout(timer);
-    } else {
-      setShowDownloadButton(true);
+    } else if (countdown === 0) {
+      setShowWatchButton(true);
     }
-  }, [countdown]);
+  }, [countdown, isLoading]);
 
-  const handleDownload = () => {
+  const handleWatch = () => {
     if (!movie) return;
     
     if (downloadUrl) {
       // Open the actual download link
       window.open(downloadUrl, '_blank');
       toast({
-        title: "Download Started",
-        description: `${movie.title} download has been initiated.`,
+        title: "Opening Movie",
+        description: `${movie.title} is now opening.`,
       });
     } else {
       toast({
-        title: "No Download Link",
-        description: "Download link is not available for this movie.",
+        title: "No Watch Link",
+        description: "Watch link is not available for this movie.",
         variant: "destructive"
       });
     }
@@ -154,11 +154,11 @@ const Download = () => {
             <p className="text-gray-400 text-lg">{movie.description}</p>
           </div>
 
-          {!showDownloadButton ? (
+          {!showWatchButton ? (
             <div className="bg-gray-800 rounded-lg p-8 mb-8">
               <div className="flex items-center justify-center mb-6">
                 <Clock className="w-8 h-8 text-yellow-400 mr-3" />
-                <h2 className="text-2xl font-semibold">Preparing Download</h2>
+                <h2 className="text-2xl font-semibold">Preparing to Watch</h2>
               </div>
               
               <div className="text-6xl font-bold text-yellow-400 mb-4">
@@ -166,7 +166,7 @@ const Download = () => {
               </div>
               
               <p className="text-gray-400">
-                Please wait while we prepare your download link...
+                Please wait while we prepare your movie...
               </p>
               
               <div className="w-full bg-gray-700 rounded-full h-2 mt-6">
@@ -179,36 +179,36 @@ const Download = () => {
           ) : (
             <div className="bg-gray-800 rounded-lg p-8">
               <h2 className="text-2xl font-semibold mb-6 text-green-400">
-                Ready to Download!
+                Ready to Watch!
               </h2>
               
               {downloadUrl ? (
                 <Button 
-                  onClick={handleDownload}
+                  onClick={handleWatch}
                   className="bg-red-600 hover:bg-red-700 text-white px-8 py-4 text-xl"
                   size="lg"
                 >
-                  <DownloadIcon className="w-6 h-6 mr-3" />
-                  Download Now
+                  <Play className="w-6 h-6 mr-3" />
+                  Watch Now
                 </Button>
               ) : (
                 <div className="text-center">
-                  <p className="text-yellow-400 mb-4">Download link not available</p>
+                  <p className="text-yellow-400 mb-4">Watch link not available</p>
                   <p className="text-gray-400 text-sm">
-                    Please contact admin to add download link for this movie
+                    Please contact admin to add watch link for this movie
                   </p>
                 </div>
               )}
               
               <p className="text-gray-400 mt-4 text-sm">
-                {downloadUrl ? "Click to start download" : "Download link will be provided by admin"}
+                {downloadUrl ? "Click to start watching" : "Watch link will be provided by admin"}
               </p>
             </div>
           )}
 
           <div className="mt-8 text-sm text-gray-500">
             <p>⚠️ Please ensure you have a stable internet connection</p>
-            <p>📁 Download will be saved to your default downloads folder</p>
+            <p>🎬 Enjoy your movie experience</p>
           </div>
         </div>
       </div>

@@ -3,9 +3,8 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Trash2, Plus, ExternalLink } from "lucide-react";
+import { Trash2, Plus, ExternalLink, Search } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import { Movie } from "@/types/Movie";
@@ -23,41 +22,37 @@ interface MovieLinkManagerProps {
 
 export const MovieLinkManager = ({ movies }: MovieLinkManagerProps) => {
   const [movieLinks, setMovieLinks] = useState<MovieLink[]>([]);
-  const [selectedMovieId, setSelectedMovieId] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedMovie, setSelectedMovie] = useState<Movie | null>(null);
   const [downloadUrl, setDownloadUrl] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
+  const filteredMovies = movies.filter(movie =>
+    movie.title.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   const loadMovieLinks = async () => {
     try {
-      // Use rpc to get movie links with movie titles since types aren't updated yet
-      const { data, error } = await supabase.rpc('get_movie_links_with_titles');
-      
-      if (error) {
-        // Fallback to raw query if RPC doesn't exist
-        const { data: rawData, error: rawError } = await supabase
-          .from('movie_links' as any)
-          .select(`
-            id,
-            movie_id,
-            download_url,
-            movies!movie_links_movie_id_fkey(title)
-          `)
-          .order('created_at', { ascending: false });
-          
-        if (rawError) throw rawError;
-        
-        const formattedLinks: MovieLink[] = (rawData as any[]).map((link: any) => ({
-          id: link.id,
-          movie_id: link.movie_id,
-          download_url: link.download_url,
-          movie_title: link.movies?.title || 'Unknown Movie'
-        }));
-        
-        setMovieLinks(formattedLinks);
-        return;
-      }
+      const { data, error } = await supabase
+        .from('movie_links')
+        .select(`
+          id,
+          movie_id,
+          download_url,
+          movies!inner(title)
+        `)
+        .order('created_at', { ascending: false });
 
-      setMovieLinks(data || []);
+      if (error) throw error;
+
+      const formattedLinks: MovieLink[] = (data as any[]).map((link: any) => ({
+        id: link.id,
+        movie_id: link.movie_id,
+        download_url: link.download_url,
+        movie_title: link.movies?.title || 'Unknown Movie'
+      }));
+
+      setMovieLinks(formattedLinks);
     } catch (error) {
       console.error('Error loading movie links:', error);
       toast({
@@ -73,7 +68,7 @@ export const MovieLinkManager = ({ movies }: MovieLinkManagerProps) => {
   }, []);
 
   const handleAddLink = async () => {
-    if (!selectedMovieId || !downloadUrl) {
+    if (!selectedMovie || !downloadUrl) {
       toast({
         title: "Error",
         description: "Please select a movie and enter a download URL.",
@@ -85,9 +80,9 @@ export const MovieLinkManager = ({ movies }: MovieLinkManagerProps) => {
     setIsLoading(true);
     try {
       const { error } = await supabase
-        .from('movie_links' as any)
+        .from('movie_links')
         .insert([{
-          movie_id: selectedMovieId,
+          movie_id: selectedMovie.id,
           download_url: downloadUrl
         }]);
 
@@ -98,8 +93,9 @@ export const MovieLinkManager = ({ movies }: MovieLinkManagerProps) => {
         description: "Movie download link added successfully!",
       });
 
-      setSelectedMovieId("");
+      setSelectedMovie(null);
       setDownloadUrl("");
+      setSearchQuery("");
       loadMovieLinks();
     } catch (error) {
       console.error('Error adding movie link:', error);
@@ -116,7 +112,7 @@ export const MovieLinkManager = ({ movies }: MovieLinkManagerProps) => {
   const handleDeleteLink = async (linkId: string) => {
     try {
       const { error } = await supabase
-        .from('movie_links' as any)
+        .from('movie_links')
         .delete()
         .eq('id', linkId);
 
@@ -149,19 +145,34 @@ export const MovieLinkManager = ({ movies }: MovieLinkManagerProps) => {
         </CardHeader>
         <CardContent className="space-y-4">
           <div>
-            <Label htmlFor="movie-select" className="text-white">Select Movie</Label>
-            <Select value={selectedMovieId} onValueChange={setSelectedMovieId}>
-              <SelectTrigger className="bg-gray-700 border-gray-600 text-white">
-                <SelectValue placeholder="Choose a movie..." />
-              </SelectTrigger>
-              <SelectContent>
-                {movies.map((movie) => (
-                  <SelectItem key={movie.id} value={movie.id}>
+            <Label htmlFor="movie-search" className="text-white">Search Movie</Label>
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+              <Input
+                id="movie-search"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search for a movie..."
+                className="bg-gray-700 border-gray-600 text-white pl-10"
+              />
+            </div>
+            
+            {searchQuery && filteredMovies.length > 0 && (
+              <div className="mt-2 max-h-40 overflow-y-auto bg-gray-700 border border-gray-600 rounded">
+                {filteredMovies.slice(0, 5).map((movie) => (
+                  <div
+                    key={movie.id}
+                    onClick={() => {
+                      setSelectedMovie(movie);
+                      setSearchQuery(movie.title);
+                    }}
+                    className="p-2 hover:bg-gray-600 cursor-pointer text-white border-b border-gray-600 last:border-b-0"
+                  >
                     {movie.title}
-                  </SelectItem>
+                  </div>
                 ))}
-              </SelectContent>
-            </Select>
+              </div>
+            )}
           </div>
 
           <div>
@@ -177,7 +188,7 @@ export const MovieLinkManager = ({ movies }: MovieLinkManagerProps) => {
 
           <Button 
             onClick={handleAddLink}
-            disabled={isLoading}
+            disabled={isLoading || !selectedMovie}
             className="w-full bg-green-600 hover:bg-green-700"
           >
             {isLoading ? "Adding..." : "Add Download Link"}

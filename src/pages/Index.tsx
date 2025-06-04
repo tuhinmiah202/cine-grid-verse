@@ -13,6 +13,7 @@ const Index = () => {
   const [movies, setMovies] = useState<Movie[]>([]);
   const [filteredMovies, setFilteredMovies] = useState<Movie[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string>("All");
+  const [selectedType, setSelectedType] = useState<string>("All"); // New state for Movies/Series filter
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [isLoading, setIsLoading] = useState(true);
 
@@ -92,9 +93,24 @@ const Index = () => {
     loadMovies();
   }, []);
 
-  // Filter movies based on category and search query
+  // Filter movies based on category, type, and search query
   useEffect(() => {
     let filtered = movies;
+    
+    // Filter by type (Movies/Series)
+    if (selectedType === "Movies") {
+      filtered = filtered.filter(movie => 
+        movie.category !== "TV Series" && 
+        movie.category !== "Series" && 
+        movie.category !== "TV Show"
+      );
+    } else if (selectedType === "Series") {
+      filtered = filtered.filter(movie => 
+        movie.category === "TV Series" || 
+        movie.category === "Series" || 
+        movie.category === "TV Show"
+      );
+    }
     
     if (selectedCategory !== "All") {
       filtered = filtered.filter(movie => movie.category === selectedCategory);
@@ -108,9 +124,10 @@ const Index = () => {
     }
     
     setFilteredMovies(filtered);
-  }, [movies, selectedCategory, searchQuery]);
+  }, [movies, selectedCategory, selectedType, searchQuery]);
 
   const categories = ["All", ...Array.from(new Set(movies.map(movie => movie.category)))];
+  const types = ["All", "Movies", "Series"];
 
   if (isLoading) {
     return (
@@ -130,6 +147,24 @@ const Index = () => {
       <div className="container mx-auto px-4 py-8">
         <div className="flex flex-col lg:flex-row gap-6 mb-8">
           <SearchBar searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
+          
+          {/* Type Filter (Movies/Series) */}
+          <div className="flex flex-wrap gap-2">
+            {types.map((type) => (
+              <button
+                key={type}
+                onClick={() => setSelectedType(type)}
+                className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                  selectedType === type
+                    ? 'bg-red-600 text-white'
+                    : 'bg-gray-700 text-white hover:bg-gray-600'
+                }`}
+              >
+                {type}
+              </button>
+            ))}
+          </div>
+          
           <CategoryFilter 
             categories={categories}
             selectedCategory={selectedCategory}
@@ -139,7 +174,8 @@ const Index = () => {
 
         <div className="mb-8">
           <h2 className="text-2xl font-bold mb-4">
-            {selectedCategory === "All" ? "All Movies & Series" : selectedCategory}
+            {selectedType === "All" ? "All Movies & Series" : selectedType}
+            {selectedCategory !== "All" && ` - ${selectedCategory}`}
             <span className="text-yellow-400 ml-2">({filteredMovies.length})</span>
           </h2>
           
