@@ -6,13 +6,14 @@ import { AdminMovieList } from "@/components/AdminMovieList";
 import { TMDBSearch } from "@/components/TMDBSearch";
 import { MovieLinkManager } from "@/components/MovieLinkManager";
 import { AdminPasswordProtection } from "@/components/AdminPasswordProtection";
+import { BulkImport } from "@/components/BulkImport";
 import { Movie } from "@/types/Movie";
 import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 
 const Admin = () => {
   const [movies, setMovies] = useState<Movie[]>([]);
-  const [activeTab, setActiveTab] = useState<'tmdb' | 'manual' | 'links'>('tmdb');
+  const [activeTab, setActiveTab] = useState<'bulk' | 'tmdb' | 'manual' | 'links'>('bulk');
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   const loadMovies = async () => {
@@ -142,10 +143,20 @@ const Admin = () => {
               <h2 className="text-2xl font-bold">Manage Content</h2>
             </div>
             
-            <div className="flex mb-4 bg-gray-800 rounded-lg p-1">
+            <div className="flex mb-4 bg-gray-800 rounded-lg p-1 flex-wrap">
+              <button
+                onClick={() => setActiveTab('bulk')}
+                className={`flex-1 py-2 px-3 rounded-md font-medium transition-colors text-sm ${
+                  activeTab === 'bulk'
+                    ? 'bg-yellow-400 text-black'
+                    : 'text-gray-400 hover:text-white'
+                }`}
+              >
+                Bulk Import
+              </button>
               <button
                 onClick={() => setActiveTab('tmdb')}
-                className={`flex-1 py-2 px-4 rounded-md font-medium transition-colors ${
+                className={`flex-1 py-2 px-3 rounded-md font-medium transition-colors text-sm ${
                   activeTab === 'tmdb'
                     ? 'bg-yellow-400 text-black'
                     : 'text-gray-400 hover:text-white'
@@ -155,7 +166,7 @@ const Admin = () => {
               </button>
               <button
                 onClick={() => setActiveTab('manual')}
-                className={`flex-1 py-2 px-4 rounded-md font-medium transition-colors ${
+                className={`flex-1 py-2 px-3 rounded-md font-medium transition-colors text-sm ${
                   activeTab === 'manual'
                     ? 'bg-yellow-400 text-black'
                     : 'text-gray-400 hover:text-white'
@@ -165,7 +176,7 @@ const Admin = () => {
               </button>
               <button
                 onClick={() => setActiveTab('links')}
-                className={`flex-1 py-2 px-4 rounded-md font-medium transition-colors ${
+                className={`flex-1 py-2 px-3 rounded-md font-medium transition-colors text-sm ${
                   activeTab === 'links'
                     ? 'bg-yellow-400 text-black'
                     : 'text-gray-400 hover:text-white'
@@ -175,6 +186,10 @@ const Admin = () => {
                 Watch Links
               </button>
             </div>
+
+            {activeTab === 'bulk' && (
+              <BulkImport onImportComplete={loadMovies} />
+            )}
 
             {activeTab === 'tmdb' && (
               <div className="bg-gray-800 p-6 rounded-lg">
