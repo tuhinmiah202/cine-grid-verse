@@ -1,10 +1,10 @@
+
 import { useState, useEffect } from "react";
 import { MovieCard } from "@/components/MovieCard";
 import { CategoryFilter } from "@/components/CategoryFilter";
 import { Hero } from "@/components/Hero";
 import { SearchBar } from "@/components/SearchBar";
 import { Footer } from "@/components/Footer";
-import { TopSection } from "@/components/TopSection";
 import { Movie } from "@/types/Movie";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
@@ -144,19 +144,11 @@ const Index = () => {
     <div className="min-h-screen bg-gray-900 text-white">
       <Hero />
       
-      <div className="container mx-auto px-4 py-6">
-        {/* Show top sections only when no search or filters are active */}
-        {!searchQuery && selectedCategory === "All" && selectedType === "All" && (
-          <>
-            <TopSection type="movie" title="Top 100 Movies" />
-            <TopSection type="tv" title="Top 100 TV Series" />
-          </>
-        )}
-
-        <div className="flex flex-col space-y-4 mb-6">
+      <div className="container mx-auto px-2 sm:px-4 py-4 sm:py-6">
+        <div className="flex flex-col space-y-3 sm:space-y-4 mb-4 sm:mb-6">
           <SearchBar searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
           
-          <div className="flex flex-col sm:flex-row gap-4">
+          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
             {/* Type Filter (Movies/Series) */}
             <div className="flex flex-wrap gap-2">
               {types.map((type) => (
@@ -182,33 +174,30 @@ const Index = () => {
           </div>
         </div>
 
-        {/* Show filtered results when search or filters are active */}
-        {(searchQuery || selectedCategory !== "All" || selectedType !== "All") && (
-          <div className="mb-6">
-            <h2 className="text-xl sm:text-2xl font-bold mb-4">
-              {selectedType === "All" ? "All Movies & Series" : selectedType}
-              {selectedCategory !== "All" && ` - ${selectedCategory}`}
-              <span className="text-yellow-400 ml-2">({filteredMovies.length})</span>
-            </h2>
-            
-            {filteredMovies.length === 0 ? (
-              <div className="text-center py-12">
-                <p className="text-gray-400 text-lg">No movies found matching your criteria.</p>
-              </div>
-            ) : (
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 sm:gap-4 md:gap-6">
-                {filteredMovies.map((movie) => (
-                  <MovieCard key={movie.id} movie={movie} />
-                ))}
-              </div>
-            )}
-          </div>
-        )}
+        <div className="mb-4 sm:mb-6">
+          <h2 className="text-lg sm:text-xl md:text-2xl font-bold mb-3 sm:mb-4">
+            {selectedType === "All" ? "All Movies & Series" : selectedType}
+            {selectedCategory !== "All" && ` - ${selectedCategory}`}
+            <span className="text-yellow-400 ml-2">({filteredMovies.length})</span>
+          </h2>
+          
+          {filteredMovies.length === 0 ? (
+            <div className="text-center py-8 sm:py-12">
+              <p className="text-gray-400 text-base sm:text-lg">No movies found matching your criteria.</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-2 sm:gap-3 md:gap-4 lg:gap-6">
+              {filteredMovies.map((movie) => (
+                <MovieCard key={movie.id} movie={movie} />
+              ))}
+            </div>
+          )}
+        </div>
 
         {/* Ad Space Placeholder */}
-        <div className="bg-gray-800 border-2 border-dashed border-gray-600 rounded-lg p-6 text-center mb-6">
+        <div className="bg-gray-800 border-2 border-dashed border-gray-600 rounded-lg p-4 sm:p-6 text-center mb-4 sm:mb-6">
           <p className="text-gray-400">Advertisement Space</p>
-          <p className="text-sm text-gray-500">728x90 Banner Ad</p>
+          <p className="text-xs sm:text-sm text-gray-500">728x90 Banner Ad</p>
         </div>
       </div>
 

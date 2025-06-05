@@ -13,7 +13,7 @@ serve(async (req) => {
   }
 
   try {
-    const { query } = await req.json();
+    const { query, type = 'multi' } = await req.json();
     
     if (!query) {
       return new Response(
@@ -26,8 +26,21 @@ serve(async (req) => {
     }
 
     const TMDB_API_KEY = '566149bf98e53cc39a4c04bfe01c03fc';
+    let endpoint = '';
+    
+    switch (type) {
+      case 'movie':
+        endpoint = 'search/movie';
+        break;
+      case 'tv':
+        endpoint = 'search/tv';
+        break;
+      default:
+        endpoint = 'search/multi';
+    }
+    
     const response = await fetch(
-      `https://api.themoviedb.org/3/search/multi?api_key=${TMDB_API_KEY}&query=${encodeURIComponent(query)}`
+      `https://api.themoviedb.org/3/${endpoint}?api_key=${TMDB_API_KEY}&query=${encodeURIComponent(query)}`
     );
 
     if (!response.ok) {
