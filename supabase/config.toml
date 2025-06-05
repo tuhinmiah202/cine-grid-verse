@@ -6,3 +6,6 @@ verify_jwt = false
 
 [functions.tmdb-details]
 verify_jwt = false
+
+[functions.tmdb-top]
+verify_jwt = false
