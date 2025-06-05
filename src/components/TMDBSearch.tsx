@@ -50,9 +50,15 @@ export const TMDBSearch = ({ onMovieAdded }: TMDBSearchProps) => {
         10770: "TV Movie", 53: "Thriller", 10752: "War", 37: "Western"
       };
 
-      const category = tmdbMovie.genre_ids && tmdbMovie.genre_ids.length > 0 
-        ? genreMap[tmdbMovie.genre_ids[0]] || "Drama"
-        : "Drama";
+      // Determine if it's a TV series or movie
+      const isTV = tmdbMovie.media_type === 'tv' || tmdbMovie.first_air_date;
+      let category = "Drama"; // default
+
+      if (isTV) {
+        category = "TV Series";
+      } else if (tmdbMovie.genre_ids && tmdbMovie.genre_ids.length > 0) {
+        category = genreMap[tmdbMovie.genre_ids[0]] || "Drama";
+      }
 
       const title = tmdbMovie.title || tmdbMovie.name || "Unknown Title";
       const releaseDate = tmdbMovie.release_date || tmdbMovie.first_air_date || new Date().toISOString().split('T')[0];
@@ -79,7 +85,7 @@ export const TMDBSearch = ({ onMovieAdded }: TMDBSearchProps) => {
 
       toast({
         title: "Success",
-        description: `${title} added successfully!`,
+        description: `${title} added successfully as ${isTV ? 'TV Series' : 'Movie'}!`,
       });
 
       onMovieAdded();
@@ -87,7 +93,7 @@ export const TMDBSearch = ({ onMovieAdded }: TMDBSearchProps) => {
       console.error('Error adding movie:', error);
       toast({
         title: "Error",
-        description: "Failed to add movie. It might already exist.",
+        description: "Failed to add item. It might already exist.",
         variant: "destructive"
       });
     }
@@ -134,7 +140,7 @@ export const TMDBSearch = ({ onMovieAdded }: TMDBSearchProps) => {
                 <p className="text-xs text-gray-500 mt-1">
                   {movie.release_date || movie.first_air_date} • 
                   Rating: {movie.vote_average}/10 •
-                  {movie.media_type === 'tv' ? ' TV Series' : ' Movie'}
+                  {movie.media_type === 'tv' || movie.first_air_date ? ' TV Series' : ' Movie'}
                 </p>
               </div>
               <Button
@@ -143,7 +149,7 @@ export const TMDBSearch = ({ onMovieAdded }: TMDBSearchProps) => {
                 className="bg-green-600 hover:bg-green-700"
               >
                 <Plus className="w-4 h-4 mr-1" />
-                Add
+                Add as {movie.media_type === 'tv' || movie.first_air_date ? 'Series' : 'Movie'}
               </Button>
             </div>
           ))}

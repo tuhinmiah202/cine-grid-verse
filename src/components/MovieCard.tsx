@@ -15,7 +15,7 @@ export const MovieCard = ({ movie }: MovieCardProps) => {
           <img 
             src={movie.image} 
             alt={movie.title}
-            className="w-full h-64 object-cover"
+            className="w-full h-48 sm:h-64 object-cover"
             onError={(e) => {
               const target = e.target as HTMLImageElement;
               target.src = "https://images.unsplash.com/photo-1518676590629-3dcbd9c5a5c9?w=500";
@@ -32,22 +32,22 @@ export const MovieCard = ({ movie }: MovieCardProps) => {
           </div>
           {movie.rating && (
             <div className="absolute top-2 left-2 bg-black bg-opacity-75 rounded px-2 py-1 flex items-center">
-              <Star className="w-4 h-4 text-yellow-400 fill-current mr-1" />
-              <span className="text-white text-sm">{movie.rating}</span>
+              <Star className="w-3 h-3 sm:w-4 sm:h-4 text-yellow-400 fill-current mr-1" />
+              <span className="text-white text-xs sm:text-sm">{movie.rating}</span>
             </div>
           )}
         </div>
         
-        <div className="p-4">
-          <h3 className="text-lg font-bold text-white mb-2 line-clamp-1">{movie.title}</h3>
-          <p className="text-gray-400 text-sm mb-3 line-clamp-2">{movie.description}</p>
+        <div className="p-3 sm:p-4">
+          <h3 className="text-sm sm:text-lg font-bold text-white mb-2 line-clamp-1">{movie.title}</h3>
+          <p className="text-gray-400 text-xs sm:text-sm mb-3 line-clamp-2">{movie.description}</p>
           
           <div className="flex items-center justify-between">
             <span className="bg-purple-600 text-white px-2 py-1 rounded text-xs">
               {movie.category}
             </span>
             <div className="flex items-center text-gray-400 text-xs">
-              <Calendar className="w-4 h-4 mr-1" />
+              <Calendar className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
               {new Date(movie.releaseDate).getFullYear()}
             </div>
           </div>

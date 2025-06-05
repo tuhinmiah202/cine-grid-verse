@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { ArrowLeft, Film, Database, LinkIcon } from "lucide-react";
@@ -6,6 +5,7 @@ import { AdminForm } from "@/components/AdminForm";
 import { AdminMovieList } from "@/components/AdminMovieList";
 import { TMDBSearch } from "@/components/TMDBSearch";
 import { MovieLinkManager } from "@/components/MovieLinkManager";
+import { AdminPasswordProtection } from "@/components/AdminPasswordProtection";
 import { Movie } from "@/types/Movie";
 import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -13,6 +13,7 @@ import { supabase } from "@/integrations/supabase/client";
 const Admin = () => {
   const [movies, setMovies] = useState<Movie[]>([]);
   const [activeTab, setActiveTab] = useState<'tmdb' | 'manual' | 'links'>('tmdb');
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   const loadMovies = async () => {
     try {
@@ -47,8 +48,14 @@ const Admin = () => {
   };
 
   useEffect(() => {
-    loadMovies();
-  }, []);
+    if (isAuthenticated) {
+      loadMovies();
+    }
+  }, [isAuthenticated]);
+
+  if (!isAuthenticated) {
+    return <AdminPasswordProtection onPasswordCorrect={() => setIsAuthenticated(true)} />;
+  }
 
   const addMovie = async (newMovie: Omit<Movie, "id">) => {
     try {
@@ -165,7 +172,7 @@ const Admin = () => {
                 }`}
               >
                 <LinkIcon className="w-4 h-4 mr-1 inline" />
-                Download Links
+                Watch Links
               </button>
             </div>
 

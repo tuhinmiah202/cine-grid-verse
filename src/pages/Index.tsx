@@ -13,7 +13,7 @@ const Index = () => {
   const [movies, setMovies] = useState<Movie[]>([]);
   const [filteredMovies, setFilteredMovies] = useState<Movie[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string>("All");
-  const [selectedType, setSelectedType] = useState<string>("All"); // New state for Movies/Series filter
+  const [selectedType, setSelectedType] = useState<string>("All");
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [isLoading, setIsLoading] = useState(true);
 
@@ -144,36 +144,38 @@ const Index = () => {
     <div className="min-h-screen bg-gray-900 text-white">
       <Hero />
       
-      <div className="container mx-auto px-4 py-8">
-        <div className="flex flex-col lg:flex-row gap-6 mb-8">
+      <div className="container mx-auto px-4 py-6">
+        <div className="flex flex-col space-y-4 mb-6">
           <SearchBar searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
           
-          {/* Type Filter (Movies/Series) */}
-          <div className="flex flex-wrap gap-2">
-            {types.map((type) => (
-              <button
-                key={type}
-                onClick={() => setSelectedType(type)}
-                className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                  selectedType === type
-                    ? 'bg-red-600 text-white'
-                    : 'bg-gray-700 text-white hover:bg-gray-600'
-                }`}
-              >
-                {type}
-              </button>
-            ))}
+          <div className="flex flex-col sm:flex-row gap-4">
+            {/* Type Filter (Movies/Series) */}
+            <div className="flex flex-wrap gap-2">
+              {types.map((type) => (
+                <button
+                  key={type}
+                  onClick={() => setSelectedType(type)}
+                  className={`px-3 py-2 rounded-lg font-medium transition-colors text-sm ${
+                    selectedType === type
+                      ? 'bg-red-600 text-white'
+                      : 'bg-gray-700 text-white hover:bg-gray-600'
+                  }`}
+                >
+                  {type}
+                </button>
+              ))}
+            </div>
+            
+            <CategoryFilter 
+              categories={categories}
+              selectedCategory={selectedCategory}
+              onCategoryChange={setSelectedCategory}
+            />
           </div>
-          
-          <CategoryFilter 
-            categories={categories}
-            selectedCategory={selectedCategory}
-            onCategoryChange={setSelectedCategory}
-          />
         </div>
 
-        <div className="mb-8">
-          <h2 className="text-2xl font-bold mb-4">
+        <div className="mb-6">
+          <h2 className="text-xl sm:text-2xl font-bold mb-4">
             {selectedType === "All" ? "All Movies & Series" : selectedType}
             {selectedCategory !== "All" && ` - ${selectedCategory}`}
             <span className="text-yellow-400 ml-2">({filteredMovies.length})</span>
@@ -184,7 +186,7 @@ const Index = () => {
               <p className="text-gray-400 text-lg">No movies found matching your criteria.</p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 sm:gap-4 md:gap-6">
               {filteredMovies.map((movie) => (
                 <MovieCard key={movie.id} movie={movie} />
               ))}
@@ -193,7 +195,7 @@ const Index = () => {
         </div>
 
         {/* Ad Space Placeholder */}
-        <div className="bg-gray-800 border-2 border-dashed border-gray-600 rounded-lg p-8 text-center mb-8">
+        <div className="bg-gray-800 border-2 border-dashed border-gray-600 rounded-lg p-6 text-center mb-6">
           <p className="text-gray-400">Advertisement Space</p>
           <p className="text-sm text-gray-500">728x90 Banner Ad</p>
         </div>

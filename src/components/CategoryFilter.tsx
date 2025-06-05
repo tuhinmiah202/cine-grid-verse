@@ -12,7 +12,7 @@ export const CategoryFilter = ({ categories, selectedCategory, onCategoryChange 
         <button
           key={category}
           onClick={() => onCategoryChange(category)}
-          className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+          className={`px-3 py-2 rounded-lg font-medium transition-colors text-sm ${
             selectedCategory === category
               ? 'bg-yellow-400 text-black'
               : 'bg-gray-700 text-white hover:bg-gray-600'
