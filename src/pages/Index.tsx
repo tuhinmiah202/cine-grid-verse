@@ -97,18 +97,25 @@ const Index = () => {
   useEffect(() => {
     let filtered = movies;
     
-    // Filter by type (Movies/Series)
+    // Filter by type (Movies/Series/Anime)
     if (selectedType === "Movies") {
       filtered = filtered.filter(movie => 
         movie.category !== "TV Series" && 
         movie.category !== "Series" && 
-        movie.category !== "TV Show"
+        movie.category !== "TV Show" &&
+        movie.category !== "Animation"
       );
     } else if (selectedType === "Series") {
       filtered = filtered.filter(movie => 
         movie.category === "TV Series" || 
         movie.category === "Series" || 
         movie.category === "TV Show"
+      );
+    } else if (selectedType === "Anime") {
+      filtered = filtered.filter(movie => 
+        movie.category === "Animation" ||
+        movie.title.toLowerCase().includes("anime") ||
+        movie.description.toLowerCase().includes("anime")
       );
     }
     
@@ -127,7 +134,7 @@ const Index = () => {
   }, [movies, selectedCategory, selectedType, searchQuery]);
 
   const categories = ["All", ...Array.from(new Set(movies.map(movie => movie.category)))];
-  const types = ["All", "Movies", "Series"];
+  const types = ["All", "Movies", "Series", "Anime"];
 
   if (isLoading) {
     return (
@@ -149,7 +156,7 @@ const Index = () => {
           <SearchBar searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
           
           <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
-            {/* Type Filter (Movies/Series) */}
+            {/* Type Filter (Movies/Series/Anime) */}
             <div className="flex flex-wrap gap-2">
               {types.map((type) => (
                 <button

@@ -14,111 +14,142 @@ export const BulkImport = ({ onImportComplete }: BulkImportProps) => {
   const [progress, setProgress] = useState(0);
   const [currentTitle, setCurrentTitle] = useState("");
 
-  // Popular titles from the screenshots
-  const titles = [
-    // Crime & Drama Series
-    { title: "Dexter", type: "tv" },
-    { title: "Luther", type: "tv" },
-    { title: "Broadchurch", type: "tv" },
-    { title: "The Night Of", type: "tv" },
-    { title: "Top of the Lake", type: "tv" },
-    { title: "The Fall", type: "tv" },
+  // Popular titles from the screenshots with proper typing
+  const titles: Array<{ title: string; type: 'tv' | 'movie' }> = [
+    // From screenshots - Top movies and series
+    { title: "The Godfather", type: "movie" },
+    { title: "The Godfather Part II", type: "movie" },
+    { title: "The Dark Knight", type: "movie" },
+    { title: "Pulp Fiction", type: "movie" },
+    { title: "Fight Club", type: "movie" },
+    { title: "Forrest Gump", type: "movie" },
+    { title: "Inception", type: "movie" },
+    { title: "Interstellar", type: "movie" },
+    { title: "The Matrix", type: "movie" },
     
-    // Fantasy, Sci-Fi & Supernatural
-    { title: "Game of Thrones", type: "tv" },
-    { title: "The Mandalorian", type: "tv" },
-    { title: "Stranger Things", type: "tv" },
-    { title: "The Last of Us", type: "tv" },
-    { title: "Westworld", type: "tv" },
-    { title: "Dark", type: "tv" },
-    { title: "The Expanse", type: "tv" },
-    { title: "Black Mirror", type: "tv" },
-    { title: "The Witcher", type: "tv" },
-    { title: "Doctor Who", type: "tv" },
+    // Timeless Masterpieces
+    { title: "Schindler's List", type: "movie" },
+    { title: "Casablanca", type: "movie" },
+    { title: "Citizen Kane", type: "movie" },
+    { title: "12 Angry Men", type: "movie" },
+    { title: "Lawrence of Arabia", type: "movie" },
+    { title: "The Bridge on the River Kwai", type: "movie" },
+    { title: "Gone with the Wind", type: "movie" },
+    { title: "One Flew Over the Cuckoo's Nest", type: "movie" },
+    { title: "Taxi Driver", type: "movie" },
+    { title: "Apocalypse Now", type: "movie" },
     
-    // Animated & Adult Animation
-    { title: "Rick and Morty", type: "tv" },
-    { title: "BoJack Horseman", type: "tv" },
-    { title: "Avatar The Last Airbender", type: "tv" },
-    { title: "The Legend of Korra", type: "tv" },
-    { title: "Gravity Falls", type: "tv" },
-    { title: "Arcane", type: "tv" },
-    { title: "Invincible", type: "tv" },
-    { title: "Attack on Titan", type: "tv" },
-    { title: "Death Note", type: "tv" },
-    { title: "Fullmetal Alchemist Brotherhood", type: "tv" },
+    // Mind-Bending & Psychological
+    { title: "Memento", type: "movie" },
+    { title: "The Prestige", type: "movie" },
+    { title: "Se7en", type: "movie" },
+    { title: "Shutter Island", type: "movie" },
+    { title: "Donnie Darko", type: "movie" },
+    { title: "Black Swan", type: "movie" },
+    { title: "Oldboy", type: "movie" },
+    { title: "Requiem for a Dream", type: "movie" },
+    { title: "Mulholland Drive", type: "movie" },
+    { title: "Eternal Sunshine of the Spotless Mind", type: "movie" },
     
-    // Comedy & Sitcoms
-    { title: "Friends", type: "tv" },
-    { title: "The Office", type: "tv" },
-    { title: "The Big Bang Theory", type: "tv" },
-    { title: "How I Met Your Mother", type: "tv" },
-    { title: "Parks and Recreation", type: "tv" },
-    { title: "Brooklyn Nine-Nine", type: "tv" },
-    { title: "Seinfeld", type: "tv" },
-    { title: "Community", type: "tv" },
-    { title: "Modern Family", type: "tv" },
-    { title: "It's Always Sunny in Philadelphia", type: "tv" },
+    // Oscar Winners & Nominees
+    { title: "No Country for Old Men", type: "movie" },
+    { title: "The Silence of the Lambs", type: "movie" },
+    { title: "American Beauty", type: "movie" },
+    { title: "A Beautiful Mind", type: "movie" },
+    { title: "The Departed", type: "movie" },
+    { title: "The King's Speech", type: "movie" },
+    { title: "Birdman", type: "movie" },
+    { title: "Slumdog Millionaire", type: "movie" },
+    { title: "12 Years a Slave", type: "movie" },
+    { title: "Parasite", type: "movie" },
     
-    // Miniseries & Limited Series
-    { title: "Chernobyl", type: "tv" },
-    { title: "Band of Brothers", type: "tv" },
-    { title: "When They See Us", type: "tv" },
-    { title: "The Queen's Gambit", type: "tv" },
-    { title: "Unbelievable", type: "tv" },
-    { title: "Mare of Easttown", type: "tv" },
-    { title: "The Night Manager", type: "tv" },
-    { title: "The Haunting of Hill House", type: "tv" },
-    { title: "Alias Grace", type: "tv" },
-    { title: "Godless", type: "tv" },
+    // Sci-Fi & Fantasy Epics
+    { title: "Star Wars: Episode IV - A New Hope", type: "movie" },
+    { title: "Star Wars: The Empire Strikes Back", type: "movie" },
+    { title: "The Lord of the Rings: The Fellowship of the Ring", type: "movie" },
+    { title: "The Lord of the Rings: The Two Towers", type: "movie" },
+    { title: "The Lord of the Rings: The Return of the King", type: "movie" },
+    { title: "Avatar", type: "movie" },
+    { title: "Dune", type: "movie" },
+    { title: "Blade Runner", type: "movie" },
+    { title: "Blade Runner 2049", type: "movie" },
+    { title: "Jurassic Park", type: "movie" },
     
-    // International Hits
-    { title: "Money Heist", type: "tv" },
-    { title: "Squid Game", type: "tv" },
-    { title: "Sacred Games", type: "tv" },
-    { title: "Borgen", type: "tv" },
-    { title: "Fauda", type: "tv" },
-    { title: "Lupin", type: "tv" },
-    { title: "Giri Haji", type: "tv" },
-    { title: "My Brilliant Friend", type: "tv" },
-    { title: "The Bridge", type: "tv" },
-    { title: "Alice in Borderland", type: "tv" },
+    // Romance & Drama
+    { title: "Titanic", type: "movie" },
+    { title: "La La Land", type: "movie" },
+    { title: "The Notebook", type: "movie" },
+    { title: "Pride and Prejudice", type: "movie" },
+    { title: "Before Sunrise", type: "movie" },
+    { title: "Her", type: "movie" },
+    { title: "Call Me by Your Name", type: "movie" },
+    { title: "Atonement", type: "movie" },
     
-    // Teen, Coming-of-Age & YA
-    { title: "Euphoria", type: "tv" },
-    { title: "The OC", type: "tv" },
-    { title: "One Tree Hill", type: "tv" },
-    { title: "13 Reasons Why", type: "tv" },
-    { title: "Never Have I Ever", type: "tv" },
-    { title: "Sex Education", type: "tv" },
-    { title: "Heartstopper", type: "tv" },
-    { title: "Gossip Girl", type: "tv" },
-    { title: "The Vampire Diaries", type: "tv" },
-    { title: "Gilmore Girls", type: "tv" },
+    // International Masterpieces
+    { title: "Pan's Labyrinth", type: "movie" },
+    { title: "Amélie", type: "movie" },
+    { title: "Life Is Beautiful", type: "movie" },
+    { title: "City of God", type: "movie" },
+    { title: "Cinema Paradiso", type: "movie" },
+    { title: "Spirited Away", type: "movie" },
+    { title: "Ikiru", type: "movie" },
+    { title: "Crouching Tiger, Hidden Dragon", type: "movie" },
+    { title: "The Lives of Others", type: "movie" },
+    { title: "The Hunt", type: "movie" },
     
-    // Documentary & Reality
-    { title: "Planet Earth", type: "tv" },
-    { title: "Planet Earth II", type: "tv" },
-    { title: "Blue Planet", type: "tv" },
-    { title: "Making a Murderer", type: "tv" },
-    { title: "The Jinx", type: "tv" },
-    { title: "Tiger King", type: "tv" },
+    // Comedy Legends
+    { title: "Some Like It Hot", type: "movie" },
+    { title: "Monty Python and the Holy Grail", type: "movie" },
+    { title: "The Big Lebowski", type: "movie" },
+    { title: "Groundhog Day", type: "movie" },
+    { title: "Ferris Bueller's Day Off", type: "movie" },
+    { title: "Superbad", type: "movie" },
+    { title: "Dr. Strangelove", type: "movie" },
+    { title: "The Grand Budapest Hotel", type: "movie" },
+    { title: "The Truman Show", type: "movie" },
+    { title: "The Wolf of Wall Street", type: "movie" },
     
-    // Recent Breakouts & Underrated Gems
-    { title: "The Bear", type: "tv" },
-    { title: "Beef", type: "tv" },
-    { title: "The Boys", type: "tv" },
-    { title: "Severance", type: "tv" },
-    { title: "Yellowjackets", type: "tv" },
-    { title: "The Morning Show", type: "tv" },
-    { title: "The Leftovers", type: "tv" },
-    { title: "Station Eleven", type: "tv" },
-    { title: "Barry", type: "tv" },
-    { title: "Wild Wild Country", type: "tv" },
-    { title: "Last Chance U", type: "tv" },
-    { title: "Cheer", type: "tv" },
-    { title: "Drive to Survive", type: "tv" },
-    { title: "The Defiant Ones", type: "tv" },
+    // Animated Gems
+    { title: "Toy Story", type: "movie" },
+    { title: "Finding Nemo", type: "movie" },
+    { title: "WALL-E", type: "movie" },
+    { title: "Up", type: "movie" },
+    { title: "Inside Out", type: "movie" },
+    { title: "Coco", type: "movie" },
+    { title: "How to Train Your Dragon", type: "movie" },
+    { title: "The Lion King", type: "movie" },
+    { title: "Shrek", type: "movie" },
+    { title: "Ratatouille", type: "movie" },
+    
+    // Action, Thriller & Adventure
+    { title: "Gladiator", type: "movie" },
+    { title: "Mad Max: Fury Road", type: "movie" },
+    { title: "The Revenant", type: "movie" },
+    { title: "Skyfall", type: "movie" },
+    { title: "John Wick", type: "movie" },
+    { title: "Inglourious Basterds", type: "movie" },
+    { title: "Kill Bill: Vol. 1", type: "movie" },
+    { title: "Heat", type: "movie" },
+    { title: "Die Hard", type: "movie" },
+    { title: "The Bourne Ultimatum", type: "movie" },
+    
+    // Drama & Crime Series
+    { title: "Breaking Bad", type: "tv" },
+    { title: "The Wire", type: "tv" },
+    { title: "The Sopranos", type: "tv" },
+    { title: "Better Call Saul", type: "tv" },
+    { title: "True Detective", type: "tv" },
+    { title: "Fargo", type: "tv" },
+    { title: "Ozark", type: "tv" },
+    { title: "Mad Men", type: "tv" },
+    { title: "Boardwalk Empire", type: "tv" },
+    { title: "Narcos", type: "tv" },
+    
+    // Thriller, Mystery & Dark Shows
+    { title: "Mindhunter", type: "tv" },
+    { title: "Sherlock", type: "tv" },
+    { title: "Hannibal", type: "tv" },
+    { title: "Mr. Robot", type: "tv" },
   ];
 
   const searchAndAddTitle = async (title: string, type: 'tv' | 'movie') => {
@@ -143,7 +174,10 @@ export const BulkImport = ({ onImportComplete }: BulkImportProps) => {
         let category = "Drama";
 
         if (isTV) {
-          category = "TV Series";
+          // For TV series, use the first genre instead of just "TV Series"
+          if (tmdbItem.genre_ids && tmdbItem.genre_ids.length > 0) {
+            category = genreMap[tmdbItem.genre_ids[0]] || "Drama";
+          }
         } else if (tmdbItem.genre_ids && tmdbItem.genre_ids.length > 0) {
           category = genreMap[tmdbItem.genre_ids[0]] || "Drama";
         }

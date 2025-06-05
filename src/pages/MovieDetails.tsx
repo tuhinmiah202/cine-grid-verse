@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { Calendar, Star, ArrowLeft, Clock, Play } from "lucide-react";
@@ -197,6 +198,12 @@ const MovieDetails = () => {
               </Link>
             </div>
 
+            {/* Ad Space */}
+            <div className="bg-gray-800 border-2 border-dashed border-gray-600 rounded-lg p-6 text-center mb-6">
+              <p className="text-gray-400">Advertisement Space</p>
+              <p className="text-sm text-gray-500">728x90 Banner Ad</p>
+            </div>
+
             {/* Genres */}
             {movieDetails?.genres && movieDetails.genres.length > 0 && (
               <div className="mb-6">
@@ -228,28 +235,26 @@ const MovieDetails = () => {
               </div>
             )}
 
-            {/* Cast */}
+            {/* Cast - Only names without pictures */}
             {movieDetails?.cast && movieDetails.cast.length > 0 && (
               <div className="mb-6">
                 <h3 className="text-lg font-semibold mb-4">Cast</h3>
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                  {movieDetails.cast.slice(0, 8).map((actor) => (
-                    <div key={actor.id} className="text-center">
-                      <img
-                        src={actor.profile_path 
-                          ? `https://image.tmdb.org/t/p/w185${actor.profile_path}`
-                          : "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=185"
-                        }
-                        alt={actor.name}
-                        className="w-full h-32 object-cover rounded-lg mb-2"
-                      />
-                      <p className="font-semibold text-sm">{actor.name}</p>
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+                  {movieDetails.cast.slice(0, 12).map((actor) => (
+                    <div key={actor.id} className="bg-gray-800 rounded-lg p-3">
+                      <p className="font-semibold text-sm text-white">{actor.name}</p>
                       <p className="text-gray-400 text-xs">{actor.character}</p>
                     </div>
                   ))}
                 </div>
               </div>
             )}
+
+            {/* Another Ad Space */}
+            <div className="bg-gray-800 border-2 border-dashed border-gray-600 rounded-lg p-6 text-center mb-6">
+              <p className="text-gray-400">Advertisement Space</p>
+              <p className="text-sm text-gray-500">300x250 Rectangle Ad</p>
+            </div>
 
             {/* Production Companies */}
             {movieDetails?.production_companies && movieDetails.production_companies.length > 0 && (
