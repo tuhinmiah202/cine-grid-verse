@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
@@ -14,7 +13,7 @@ export const BulkImport = ({ onImportComplete }: BulkImportProps) => {
   const [progress, setProgress] = useState(0);
   const [currentTitle, setCurrentTitle] = useState("");
 
-  // Movie franchises and popular titles
+  // Comprehensive movie, TV series, and anime collection
   const titles: Array<{ title: string; type: 'tv' | 'movie' }> = [
     // Marvel Cinematic Universe
     { title: "Iron Man", type: "movie" },
@@ -120,6 +119,163 @@ export const BulkImport = ({ onImportComplete }: BulkImportProps) => {
     { title: "The Hobbit: An Unexpected Journey", type: "movie" },
     { title: "The Hobbit: The Desolation of Smaug", type: "movie" },
     { title: "The Hobbit: The Battle of the Five Armies", type: "movie" },
+
+    // Fast & Furious
+    { title: "The Fast and the Furious", type: "movie" },
+    { title: "2 Fast 2 Furious", type: "movie" },
+    { title: "The Fast and the Furious: Tokyo Drift", type: "movie" },
+    { title: "Fast & Furious", type: "movie" },
+    { title: "Fast Five", type: "movie" },
+    { title: "Fast & Furious 6", type: "movie" },
+    { title: "Furious 7", type: "movie" },
+    { title: "The Fate of the Furious", type: "movie" },
+    { title: "Fast & Furious Presents: Hobbs & Shaw", type: "movie" },
+    { title: "F9: The Fast Saga", type: "movie" },
+    { title: "Fast X", type: "movie" },
+
+    // Batman / The Dark Knight
+    { title: "Batman", type: "movie" },
+    { title: "Batman Returns", type: "movie" },
+    { title: "Batman Forever", type: "movie" },
+    { title: "Batman & Robin", type: "movie" },
+    { title: "Batman Begins", type: "movie" },
+    { title: "The Dark Knight", type: "movie" },
+    { title: "The Dark Knight Rises", type: "movie" },
+    { title: "Batman v Superman: Dawn of Justice", type: "movie" },
+    { title: "Justice League", type: "movie" },
+    { title: "Zack Snyder's Justice League", type: "movie" },
+    { title: "The Batman", type: "movie" },
+
+    // X-Men
+    { title: "X-Men", type: "movie" },
+    { title: "X2: X-Men United", type: "movie" },
+    { title: "X-Men: The Last Stand", type: "movie" },
+    { title: "X-Men Origins: Wolverine", type: "movie" },
+    { title: "X-Men: First Class", type: "movie" },
+    { title: "The Wolverine", type: "movie" },
+    { title: "X-Men: Days of Future Past", type: "movie" },
+    { title: "Deadpool", type: "movie" },
+    { title: "X-Men: Apocalypse", type: "movie" },
+    { title: "Logan", type: "movie" },
+    { title: "Deadpool 2", type: "movie" },
+    { title: "Dark Phoenix", type: "movie" },
+    { title: "The New Mutants", type: "movie" },
+
+    // Transformers
+    { title: "Transformers", type: "movie" },
+    { title: "Transformers: Revenge of the Fallen", type: "movie" },
+    { title: "Transformers: Dark of the Moon", type: "movie" },
+    { title: "Transformers: Age of Extinction", type: "movie" },
+    { title: "Transformers: The Last Knight", type: "movie" },
+    { title: "Bumblebee", type: "movie" },
+    { title: "Transformers: Rise of the Beasts", type: "movie" },
+
+    // The Hunger Games
+    { title: "The Hunger Games", type: "movie" },
+    { title: "The Hunger Games: Catching Fire", type: "movie" },
+    { title: "The Hunger Games: Mockingjay – Part 1", type: "movie" },
+    { title: "The Hunger Games: Mockingjay – Part 2", type: "movie" },
+    { title: "The Ballad of Songbirds and Snakes", type: "movie" },
+
+    // Pirates of the Caribbean
+    { title: "Pirates of the Caribbean: The Curse of the Black Pearl", type: "movie" },
+    { title: "Pirates of the Caribbean: Dead Man's Chest", type: "movie" },
+    { title: "Pirates of the Caribbean: At World's End", type: "movie" },
+    { title: "Pirates of the Caribbean: On Stranger Tides", type: "movie" },
+    { title: "Pirates of the Caribbean: Dead Men Tell No Tales", type: "movie" },
+
+    // Twilight Saga
+    { title: "Twilight", type: "movie" },
+    { title: "The Twilight Saga: New Moon", type: "movie" },
+    { title: "The Twilight Saga: Eclipse", type: "movie" },
+    { title: "The Twilight Saga: Breaking Dawn – Part 1", type: "movie" },
+    { title: "The Twilight Saga: Breaking Dawn – Part 2", type: "movie" },
+
+    // The Incredibles
+    { title: "The Incredibles", type: "movie" },
+    { title: "Incredibles 2", type: "movie" },
+
+    // Frozen
+    { title: "Frozen", type: "movie" },
+    { title: "Frozen II", type: "movie" },
+
+    // Toy Story
+    { title: "Toy Story", type: "movie" },
+    { title: "Toy Story 2", type: "movie" },
+    { title: "Toy Story 3", type: "movie" },
+    { title: "Toy Story 4", type: "movie" },
+
+    // Despicable Me / Minions
+    { title: "Despicable Me", type: "movie" },
+    { title: "Despicable Me 2", type: "movie" },
+    { title: "Minions", type: "movie" },
+    { title: "Despicable Me 3", type: "movie" },
+    { title: "Minions: The Rise of Gru", type: "movie" },
+
+    // Jurassic Park / World
+    { title: "Jurassic Park", type: "movie" },
+    { title: "The Lost World: Jurassic Park", type: "movie" },
+    { title: "Jurassic Park III", type: "movie" },
+    { title: "Jurassic World", type: "movie" },
+    { title: "Jurassic World: Fallen Kingdom", type: "movie" },
+    { title: "Jurassic World Dominion", type: "movie" },
+
+    // The Lego Movies
+    { title: "The Lego Movie", type: "movie" },
+    { title: "The Lego Batman Movie", type: "movie" },
+    { title: "The Lego Ninjago Movie", type: "movie" },
+    { title: "The Lego Movie 2: The Second Part", type: "movie" },
+
+    // Shrek
+    { title: "Shrek", type: "movie" },
+    { title: "Shrek 2", type: "movie" },
+    { title: "Shrek the Third", type: "movie" },
+    { title: "Shrek Forever After", type: "movie" },
+    { title: "Puss in Boots", type: "movie" },
+    { title: "Puss in Boots: The Last Wish", type: "movie" },
+
+    // The Matrix
+    { title: "The Matrix", type: "movie" },
+    { title: "The Matrix Reloaded", type: "movie" },
+    { title: "The Matrix Revolutions", type: "movie" },
+    { title: "The Matrix Resurrections", type: "movie" },
+
+    // The Conjuring Universe
+    { title: "The Conjuring", type: "movie" },
+    { title: "Annabelle", type: "movie" },
+    { title: "The Conjuring 2", type: "movie" },
+    { title: "Annabelle: Creation", type: "movie" },
+    { title: "The Nun", type: "movie" },
+    { title: "The Curse of La Llorona", type: "movie" },
+    { title: "Annabelle Comes Home", type: "movie" },
+    { title: "The Conjuring: The Devil Made Me Do It", type: "movie" },
+    { title: "The Nun II", type: "movie" },
+
+    // How to Train Your Dragon
+    { title: "How to Train Your Dragon", type: "movie" },
+    { title: "How to Train Your Dragon 2", type: "movie" },
+    { title: "How to Train Your Dragon: The Hidden World", type: "movie" },
+
+    // Finding Nemo / Dory
+    { title: "Finding Nemo", type: "movie" },
+    { title: "Finding Dory", type: "movie" },
+
+    // The Secret Life of Pets
+    { title: "The Secret Life of Pets", type: "movie" },
+    { title: "The Secret Life of Pets 2", type: "movie" },
+
+    // Zootopia
+    { title: "Zootopia", type: "movie" },
+
+    // The Chronicles of Narnia
+    { title: "The Chronicles of Narnia: The Lion, the Witch and the Wardrobe", type: "movie" },
+    { title: "The Chronicles of Narnia: Prince Caspian", type: "movie" },
+    { title: "The Chronicles of Narnia: The Voyage of the Dawn Treader", type: "movie" },
+
+    // Kung Fu Panda (excluding KFP 4 as requested)
+    { title: "Kung Fu Panda", type: "movie" },
+    { title: "Kung Fu Panda 2", type: "movie" },
+    { title: "Kung Fu Panda 3", type: "movie" },
 
     // Top Anime Titles
     { title: "Fullmetal Alchemist: Brotherhood", type: "tv" },
@@ -351,7 +507,7 @@ export const BulkImport = ({ onImportComplete }: BulkImportProps) => {
       <div>
         <h3 className="text-xl font-bold text-white mb-2">Bulk Import Popular Titles</h3>
         <p className="text-gray-400 text-sm mb-4">
-          Import {titles.length} popular movies, TV series, and anime including MCU, Star Wars, Harry Potter, Spider-Man, James Bond, LOTR, and top anime titles
+          Import {titles.length} popular movies, TV series, and anime including MCU, Star Wars, Harry Potter, Fast & Furious, Batman, X-Men, and many more blockbuster franchises
         </p>
       </div>
       
