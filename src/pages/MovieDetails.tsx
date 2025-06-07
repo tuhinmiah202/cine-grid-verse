@@ -117,15 +117,16 @@ const MovieDetails = () => {
 
   return (
     <div className="min-h-screen bg-gray-900 text-white">
-      {/* Simplified header without backdrop */}
-      <div className="bg-gray-800 py-8">
+      {/* Compact header */}
+      <div className="bg-gray-800 py-3 sm:py-4">
         <div className="container mx-auto px-4">
           <Link to="/">
             <Button 
               variant="outline" 
+              size="sm"
               className="bg-black bg-opacity-50 border-gray-600 text-white hover:bg-black hover:bg-opacity-75"
             >
-              <ArrowLeft className="w-4 h-4 mr-2" />
+              <ArrowLeft className="w-3 h-3 mr-1" />
               Back
             </Button>
           </Link>
@@ -133,14 +134,14 @@ const MovieDetails = () => {
       </div>
 
       {/* Movie Information */}
-      <div className="container mx-auto px-4 py-8">
-        <div className="flex flex-col lg:flex-row gap-8">
+      <div className="container mx-auto px-4 py-4 sm:py-6">
+        <div className="flex flex-col lg:flex-row gap-4 sm:gap-6">
           {/* Poster */}
           <div className="flex-shrink-0">
             <img 
               src={movie.image} 
               alt={movie.title}
-              className="w-80 h-auto rounded-lg shadow-2xl"
+              className="w-48 sm:w-64 h-auto rounded-lg shadow-2xl mx-auto lg:mx-0"
               onError={(e) => {
                 const target = e.target as HTMLImageElement;
                 target.src = "https://images.unsplash.com/photo-1518676590629-3dcbd9c5a5c9?w=500";
@@ -150,36 +151,36 @@ const MovieDetails = () => {
 
           {/* Details */}
           <div className="flex-1">
-            <h1 className="text-4xl font-bold mb-2">{movie.title}</h1>
+            <h1 className="text-2xl sm:text-3xl font-bold mb-1 sm:mb-2">{movie.title}</h1>
             {movieDetails?.tagline && (
-              <p className="text-xl text-gray-400 italic mb-4">{movieDetails.tagline}</p>
+              <p className="text-base sm:text-lg text-gray-400 italic mb-2 sm:mb-3">{movieDetails.tagline}</p>
             )}
 
             {/* Rating and Release Info */}
-            <div className="flex flex-wrap items-center gap-6 mb-6">
+            <div className="flex flex-wrap items-center gap-3 sm:gap-4 mb-3 sm:mb-4">
               {movie.rating && (
                 <div className="flex items-center">
-                  <Star className="w-5 h-5 text-yellow-400 fill-current mr-2" />
-                  <span className="text-lg font-semibold">{movie.rating}</span>
+                  <Star className="w-4 h-4 text-yellow-400 fill-current mr-1" />
+                  <span className="text-sm sm:text-base font-semibold">{movie.rating}</span>
                   {movieDetails?.vote_count && (
-                    <span className="text-gray-400 ml-1">({movieDetails.vote_count} votes)</span>
+                    <span className="text-gray-400 ml-1 text-xs sm:text-sm">({movieDetails.vote_count})</span>
                   )}
                 </div>
               )}
               
               <div className="flex items-center">
-                <Calendar className="w-5 h-5 text-gray-400 mr-2" />
-                <span>{new Date(movie.releaseDate).getFullYear()}</span>
+                <Calendar className="w-4 h-4 text-gray-400 mr-1" />
+                <span className="text-sm">{new Date(movie.releaseDate).getFullYear()}</span>
               </div>
 
               {movieDetails?.runtime && (
                 <div className="flex items-center">
-                  <Clock className="w-5 h-5 text-gray-400 mr-2" />
-                  <span>{Math.floor(movieDetails.runtime / 60)}h {movieDetails.runtime % 60}m</span>
+                  <Clock className="w-4 h-4 text-gray-400 mr-1" />
+                  <span className="text-sm">{Math.floor(movieDetails.runtime / 60)}h {movieDetails.runtime % 60}m</span>
                 </div>
               )}
 
-              <span className={`px-3 py-1 rounded text-sm font-semibold ${
+              <span className={`px-2 py-0.5 rounded text-xs font-semibold ${
                 movie.isReleased 
                   ? 'bg-green-500 text-white' 
                   : 'bg-yellow-500 text-black'
@@ -189,30 +190,30 @@ const MovieDetails = () => {
             </div>
 
             {/* Watch Now Button */}
-            <div className="mb-6">
+            <div className="mb-4">
               <Link to={`/download/${movie.id}`}>
-                <Button className="bg-red-600 hover:bg-red-700 text-white px-6 py-3 text-lg">
-                  <Play className="w-5 h-5 mr-2" />
+                <Button className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 text-sm sm:text-base">
+                  <Play className="w-4 h-4 mr-2" />
                   Watch Now
                 </Button>
               </Link>
             </div>
 
             {/* Ad Space */}
-            <div className="bg-gray-800 border-2 border-dashed border-gray-600 rounded-lg p-6 text-center mb-6">
-              <p className="text-gray-400">Advertisement Space</p>
-              <p className="text-sm text-gray-500">728x90 Banner Ad</p>
+            <div className="bg-gray-800 border-2 border-dashed border-gray-600 rounded-lg p-3 text-center mb-4">
+              <p className="text-gray-400 text-sm">Advertisement Space</p>
+              <p className="text-xs text-gray-500">728x90 Banner Ad</p>
             </div>
 
             {/* Genres */}
             {movieDetails?.genres && movieDetails.genres.length > 0 && (
-              <div className="mb-6">
-                <h3 className="text-lg font-semibold mb-2">Genres</h3>
-                <div className="flex flex-wrap gap-2">
+              <div className="mb-4">
+                <h3 className="text-sm sm:text-base font-semibold mb-2">Genres</h3>
+                <div className="flex flex-wrap gap-1 sm:gap-2">
                   {movieDetails.genres.map((genre) => (
                     <span 
                       key={genre.id}
-                      className="bg-purple-600 text-white px-3 py-1 rounded text-sm"
+                      className="bg-purple-600 text-white px-2 py-0.5 rounded text-xs"
                     >
                       {genre.name}
                     </span>
@@ -222,27 +223,19 @@ const MovieDetails = () => {
             )}
 
             {/* Overview */}
-            <div className="mb-6">
-              <h3 className="text-lg font-semibold mb-2">Overview</h3>
-              <p className="text-gray-300 leading-relaxed">{movie.description}</p>
+            <div className="mb-4">
+              <h3 className="text-sm sm:text-base font-semibold mb-2">Overview</h3>
+              <p className="text-gray-300 leading-relaxed text-sm sm:text-base">{movie.description}</p>
             </div>
 
-            {/* Status */}
-            {movieDetails?.status && (
-              <div className="mb-6">
-                <h3 className="text-lg font-semibold mb-2">Status</h3>
-                <p className="text-gray-300">{movieDetails.status}</p>
-              </div>
-            )}
-
-            {/* Cast - Only names without pictures */}
+            {/* Cast - Compact grid */}
             {movieDetails?.cast && movieDetails.cast.length > 0 && (
-              <div className="mb-6">
-                <h3 className="text-lg font-semibold mb-4">Cast</h3>
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-                  {movieDetails.cast.slice(0, 12).map((actor) => (
-                    <div key={actor.id} className="bg-gray-800 rounded-lg p-3">
-                      <p className="font-semibold text-sm text-white">{actor.name}</p>
+              <div className="mb-4">
+                <h3 className="text-sm sm:text-base font-semibold mb-2">Cast</h3>
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
+                  {movieDetails.cast.slice(0, 8).map((actor) => (
+                    <div key={actor.id} className="bg-gray-800 rounded-lg p-2">
+                      <p className="font-semibold text-xs text-white">{actor.name}</p>
                       <p className="text-gray-400 text-xs">{actor.character}</p>
                     </div>
                   ))}
@@ -251,31 +244,10 @@ const MovieDetails = () => {
             )}
 
             {/* Another Ad Space */}
-            <div className="bg-gray-800 border-2 border-dashed border-gray-600 rounded-lg p-6 text-center mb-6">
-              <p className="text-gray-400">Advertisement Space</p>
-              <p className="text-sm text-gray-500">300x250 Rectangle Ad</p>
+            <div className="bg-gray-800 border-2 border-dashed border-gray-600 rounded-lg p-3 text-center">
+              <p className="text-gray-400 text-sm">Advertisement Space</p>
+              <p className="text-xs text-gray-500">300x250 Rectangle Ad</p>
             </div>
-
-            {/* Production Companies */}
-            {movieDetails?.production_companies && movieDetails.production_companies.length > 0 && (
-              <div>
-                <h3 className="text-lg font-semibold mb-4">Production Companies</h3>
-                <div className="flex flex-wrap gap-4">
-                  {movieDetails.production_companies.map((company) => (
-                    <div key={company.id} className="flex items-center bg-gray-800 rounded-lg p-3">
-                      {company.logo_path && (
-                        <img
-                          src={`https://image.tmdb.org/t/p/w92${company.logo_path}`}
-                          alt={company.name}
-                          className="h-8 mr-3 object-contain"
-                        />
-                      )}
-                      <span className="text-sm">{company.name}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
           </div>
         </div>
       </div>
