@@ -13,41 +13,61 @@ serve(async (req) => {
   }
 
   try {
-    const { query, type = 'multi' } = await req.json();
+    const { query, type = 'multi', genre, page = 1 } = await req.json();
     
-    if (!query) {
-      return new Response(
-        JSON.stringify({ error: 'Query parameter is required' }), 
-        { 
-          status: 400, 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-        }
-      );
-    }
-
     const TMDB_API_KEY = '566149bf98e53cc39a4c04bfe01c03fc';
     let endpoint = '';
+    let url = '';
     
-    switch (type) {
-      case 'movie':
-        endpoint = 'search/movie';
-        break;
-      case 'tv':
-        endpoint = 'search/tv';
-        break;
-      default:
-        endpoint = 'search/multi';
+    // If genre is provided, use discover endpoint instead of search
+    if (genre) {
+      if (type === 'tv') {
+        endpoint = 'discover/tv';
+        url = `https://api.themoviedb.org/3/${endpoint}?api_key=${TMDB_API_KEY}&with_genres=${genre}&page=${page}&sort_by=popularity.desc`;
+      } else {
+        endpoint = 'discover/movie';
+        url = `https://api.themoviedb.org/3/${endpoint}?api_key=${TMDB_API_KEY}&with_genres=${genre}&page=${page}&sort_by=popularity.desc`;
+      }
+    } else {
+      // Regular search functionality
+      if (!query) {
+        return new Response(
+          JSON.stringify({ error: 'Query parameter is required when not searching by genre' }), 
+          { 
+            status: 400, 
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+          }
+        );
+      }
+
+      switch (type) {
+        case 'movie':
+          endpoint = 'search/movie';
+          break;
+        case 'tv':
+          endpoint = 'search/tv';
+          break;
+        default:
+          endpoint = 'search/multi';
+      }
+      
+      url = `https://api.themoviedb.org/3/${endpoint}?api_key=${TMDB_API_KEY}&query=${encodeURIComponent(query)}&page=${page}`;
     }
     
-    const response = await fetch(
-      `https://api.themoviedb.org/3/${endpoint}?api_key=${TMDB_API_KEY}&query=${encodeURIComponent(query)}`
-    );
+    console.log('Making request to:', url);
+    
+    const response = await fetch(url);
 
     if (!response.ok) {
+      console.error(`TMDB API error: ${response.status} - ${response.statusText}`);
+      const errorText = await response.text();
+      console.error('Error response:', errorText);
       throw new Error(`TMDB API error: ${response.status}`);
     }
 
     const data = await response.json();
+    
+    console.log('TMDB response received, results count:', data.results?.length || 0);
     
     return new Response(
       JSON.stringify(data),
@@ -59,7 +79,10 @@ serve(async (req) => {
   } catch (error) {
     console.error('Error in tmdb-search function:', error);
     return new Response(
-      JSON.stringify({ error: 'Internal server error' }),
+      JSON.stringify({ 
+        error: 'Internal server error', 
+        details: error.message 
+      }),
       { 
         status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
