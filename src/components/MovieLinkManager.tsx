@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { Trash2, Plus, ExternalLink, Search } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
@@ -206,33 +207,35 @@ export const MovieLinkManager = ({ movies }: MovieLinkManagerProps) => {
           {movieLinks.length === 0 ? (
             <p className="text-gray-400 text-center py-4">No watch links added yet.</p>
           ) : (
-            <div className="space-y-3">
-              {movieLinks.map((link) => (
-                <div key={link.id} className="bg-gray-700 p-4 rounded-lg flex items-center justify-between">
-                  <div className="flex-1">
-                    <h4 className="text-white font-medium">{link.movie_title}</h4>
-                    <p className="text-gray-400 text-sm truncate">{link.download_url}</p>
+            <ScrollArea className="h-96">
+              <div className="space-y-3 pr-4">
+                {movieLinks.map((link) => (
+                  <div key={link.id} className="bg-gray-700 p-4 rounded-lg flex items-center justify-between">
+                    <div className="flex-1">
+                      <h4 className="text-white font-medium">{link.movie_title}</h4>
+                      <p className="text-gray-400 text-sm truncate">{link.download_url}</p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => window.open(link.download_url, '_blank')}
+                        className="border-gray-600 text-gray-300 hover:text-white"
+                      >
+                        <ExternalLink className="w-4 h-4" />
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="destructive"
+                        onClick={() => handleDeleteLink(link.id)}
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => window.open(link.download_url, '_blank')}
-                      className="border-gray-600 text-gray-300 hover:text-white"
-                    >
-                      <ExternalLink className="w-4 h-4" />
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="destructive"
-                      onClick={() => handleDeleteLink(link.id)}
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
-                  </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            </ScrollArea>
           )}
         </CardContent>
       </Card>

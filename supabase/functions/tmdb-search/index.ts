@@ -23,10 +23,56 @@ serve(async (req) => {
     if (genre) {
       if (type === 'tv') {
         endpoint = 'discover/tv';
-        url = `https://api.themoviedb.org/3/${endpoint}?api_key=${TMDB_API_KEY}&with_genres=${genre}&page=${page}&sort_by=popularity.desc`;
-      } else {
+        url = `https://api.themoviedb.org/3/${endpoint}?api_key=${TMDB_API_KEY}&with_genres=${genre}&page=${page}&sort_by=popularity.desc&include_adult=false`;
+      } else if (type === 'movie') {
         endpoint = 'discover/movie';
-        url = `https://api.themoviedb.org/3/${endpoint}?api_key=${TMDB_API_KEY}&with_genres=${genre}&page=${page}&sort_by=popularity.desc`;
+        url = `https://api.themoviedb.org/3/${endpoint}?api_key=${TMDB_API_KEY}&with_genres=${genre}&page=${page}&sort_by=popularity.desc&include_adult=false`;
+      } else {
+        // For multi type, we'll search both movies and TV shows and combine results
+        const movieUrl = `https://api.themoviedb.org/3/discover/movie?api_key=${TMDB_API_KEY}&with_genres=${genre}&page=${page}&sort_by=popularity.desc&include_adult=false`;
+        const tvUrl = `https://api.themoviedb.org/3/discover/tv?api_key=${TMDB_API_KEY}&with_genres=${genre}&page=${page}&sort_by=popularity.desc&include_adult=false`;
+        
+        console.log('Making requests to both movie and TV endpoints for genre:', genre);
+        
+        const [movieResponse, tvResponse] = await Promise.all([
+          fetch(movieUrl),
+          fetch(tvUrl)
+        ]);
+        
+        if (!movieResponse.ok || !tvResponse.ok) {
+          console.error(`TMDB API error: Movie: ${movieResponse.status}, TV: ${tvResponse.status}`);
+          throw new Error(`TMDB API error`);
+        }
+        
+        const [movieData, tvData] = await Promise.all([
+          movieResponse.json(),
+          tvResponse.json()
+        ]);
+        
+        // Add media_type to distinguish between movies and TV shows
+        const movieResults = movieData.results.map((item: any) => ({ ...item, media_type: 'movie' }));
+        const tvResults = tvData.results.map((item: any) => ({ ...item, media_type: 'tv' }));
+        
+        // Combine and sort by popularity
+        const combinedResults = [...movieResults, ...tvResults]
+          .sort((a, b) => (b.popularity || 0) - (a.popularity || 0))
+          .slice(0, 20); // Limit to 20 results per page
+        
+        const combinedData = {
+          page: parseInt(page),
+          results: combinedResults,
+          total_pages: Math.max(movieData.total_pages || 0, tvData.total_pages || 0),
+          total_results: (movieData.total_results || 0) + (tvData.total_results || 0)
+        };
+        
+        console.log('Combined response received, results count:', combinedData.results.length);
+        
+        return new Response(
+          JSON.stringify(combinedData),
+          { 
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+          }
+        );
       }
     } else {
       // Regular search functionality
@@ -51,7 +97,7 @@ serve(async (req) => {
           endpoint = 'search/multi';
       }
       
-      url = `https://api.themoviedb.org/3/${endpoint}?api_key=${TMDB_API_KEY}&query=${encodeURIComponent(query)}&page=${page}`;
+      url = `https://api.themoviedb.org/3/${endpoint}?api_key=${TMDB_API_KEY}&query=${encodeURIComponent(query)}&page=${page}&include_adult=false`;
     }
     
     console.log('Making request to:', url);

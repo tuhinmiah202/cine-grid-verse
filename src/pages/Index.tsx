@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useMemo } from "react";
 import { MovieCard } from "@/components/MovieCard";
 import { CategoryFilter } from "@/components/CategoryFilter";
@@ -102,7 +101,9 @@ const Index = () => {
         movie.category !== "TV Series" && 
         movie.category !== "Series" && 
         movie.category !== "TV Show" &&
-        movie.category !== "Animation"
+        movie.category !== "Animation" &&
+        movie.category !== "Bollywood" &&
+        movie.category !== "K-Drama"
       );
     } else if (selectedType === "Series") {
       filtered = filtered.filter(movie => 
@@ -144,7 +145,18 @@ const Index = () => {
     itemsPerPage: 22 
   });
 
-  const categories = useMemo(() => ["All", ...Array.from(new Set(movies.map(movie => movie.category)))], [movies]);
+  const categories = useMemo(() => {
+    const allCategories = Array.from(new Set(movies.map(movie => movie.category)));
+    // Add Bollywood and K-Drama if not already present
+    if (!allCategories.includes("Bollywood")) {
+      allCategories.push("Bollywood");
+    }
+    if (!allCategories.includes("K-Drama")) {
+      allCategories.push("K-Drama");
+    }
+    return ["All", ...allCategories];
+  }, [movies]);
+  
   const types = ["All", "Movies", "Series", "Anime"];
 
   if (isLoading) {
