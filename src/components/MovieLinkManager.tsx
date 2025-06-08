@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -91,7 +90,7 @@ export const MovieLinkManager = ({ movies }: MovieLinkManagerProps) => {
 
       toast({
         title: "Success",
-        description: "Movie download link added successfully!",
+        description: "Movie watch link added successfully!",
       });
 
       setSelectedMovie(null);
@@ -210,26 +209,27 @@ export const MovieLinkManager = ({ movies }: MovieLinkManagerProps) => {
             <ScrollArea className="h-96">
               <div className="space-y-3 pr-4">
                 {movieLinks.map((link) => (
-                  <div key={link.id} className="bg-gray-700 p-4 rounded-lg flex items-center justify-between">
-                    <div className="flex-1">
-                      <h4 className="text-white font-medium">{link.movie_title}</h4>
-                      <p className="text-gray-400 text-sm truncate">{link.download_url}</p>
+                  <div key={link.id} className="bg-gray-700 p-3 rounded-lg">
+                    <div className="mb-2">
+                      <h4 className="text-white font-medium text-sm mb-1">{link.movie_title}</h4>
+                      <p className="text-gray-400 text-xs break-all">{link.download_url}</p>
                     </div>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 justify-end">
                       <Button
                         size="sm"
                         variant="outline"
                         onClick={() => window.open(link.download_url, '_blank')}
-                        className="border-gray-600 text-gray-300 hover:text-white"
+                        className="border-gray-600 text-gray-300 hover:text-white h-8 px-2"
                       >
-                        <ExternalLink className="w-4 h-4" />
+                        <ExternalLink className="w-3 h-3" />
                       </Button>
                       <Button
                         size="sm"
                         variant="destructive"
                         onClick={() => handleDeleteLink(link.id)}
+                        className="h-8 px-2"
                       >
-                        <Trash2 className="w-4 h-4" />
+                        <Trash2 className="w-3 h-3" />
                       </Button>
                     </div>
                   </div>

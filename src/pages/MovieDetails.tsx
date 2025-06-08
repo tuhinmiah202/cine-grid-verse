@@ -32,6 +32,7 @@ const MovieDetails = () => {
   const [movie, setMovie] = useState<Movie | null>(null);
   const [movieDetails, setMovieDetails] = useState<TMDBMovieDetails | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isLoadingDetails, setIsLoadingDetails] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -39,7 +40,7 @@ const MovieDetails = () => {
       if (!id) return;
 
       try {
-        // First, get the movie from our database
+        // First, get the movie from our database (fast)
         const { data: movieData, error: movieError } = await supabase
           .from('movies')
           .select('*')
@@ -62,26 +63,36 @@ const MovieDetails = () => {
         };
 
         setMovie(mappedMovie);
+        setIsLoading(false);
 
-        // If we have a TMDB ID, fetch detailed information
+        // Then load TMDB details in background (slower)
         if (movieData.tmdb_id) {
-          const { data: tmdbData, error: tmdbError } = await supabase.functions.invoke('tmdb-details', {
-            body: { tmdb_id: movieData.tmdb_id }
-          });
+          setIsLoadingDetails(true);
+          try {
+            const { data: tmdbData, error: tmdbError } = await supabase.functions.invoke('tmdb-details', {
+              body: { tmdb_id: movieData.tmdb_id }
+            });
 
-          if (tmdbError) throw tmdbError;
-          setMovieDetails(tmdbData);
+            if (tmdbError) {
+              console.error('TMDB details error:', tmdbError);
+            } else {
+              setMovieDetails(tmdbData);
+            }
+          } catch (tmdbError) {
+            console.error('TMDB details fetch failed:', tmdbError);
+          } finally {
+            setIsLoadingDetails(false);
+          }
         }
       } catch (error) {
         console.error('Error loading movie details:', error);
         setError('Failed to load movie details');
+        setIsLoading(false);
         toast({
           title: "Error",
           description: "Failed to load movie details.",
           variant: "destructive"
         });
-      } finally {
-        setIsLoading(false);
       }
     };
 
@@ -142,6 +153,7 @@ const MovieDetails = () => {
               src={movie.image} 
               alt={movie.title}
               className="w-48 sm:w-64 h-auto rounded-lg shadow-2xl mx-auto lg:mx-0"
+              loading="lazy"
               onError={(e) => {
                 const target = e.target as HTMLImageElement;
                 target.src = "https://images.unsplash.com/photo-1518676590629-3dcbd9c5a5c9?w=500";
@@ -205,7 +217,7 @@ const MovieDetails = () => {
               <p className="text-xs text-gray-500">728x90 Banner Ad</p>
             </div>
 
-            {/* Genres */}
+            {/* Genres - Show immediately if available, update when TMDB loads */}
             {movieDetails?.genres && movieDetails.genres.length > 0 && (
               <div className="mb-4">
                 <h3 className="text-sm sm:text-base font-semibold mb-2">Genres</h3>
@@ -228,10 +240,12 @@ const MovieDetails = () => {
               <p className="text-gray-300 leading-relaxed text-sm sm:text-base">{movie.description}</p>
             </div>
 
-            {/* Cast - Compact grid */}
+            {/* Cast - Only show when TMDB details are loaded */}
             {movieDetails?.cast && movieDetails.cast.length > 0 && (
               <div className="mb-4">
-                <h3 className="text-sm sm:text-base font-semibold mb-2">Cast</h3>
+                <h3 className="text-sm sm:text-base font-semibold mb-2">
+                  Cast {isLoadingDetails && <span className="text-xs text-gray-400">(Loading...)</span>}
+                </h3>
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
                   {movieDetails.cast.slice(0, 8).map((actor) => (
                     <div key={actor.id} className="bg-gray-800 rounded-lg p-2">
