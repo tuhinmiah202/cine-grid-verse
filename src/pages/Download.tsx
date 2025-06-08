@@ -191,9 +191,13 @@ const Download = () => {
             </div>
           ) : (
             <div className="bg-gray-800 rounded-lg p-6">
-              <h2 className="text-xl font-semibold mb-4 text-green-400">
+              <h2 className="text-xl font-semibold mb-2 text-green-400">
                 Ready to Watch!
               </h2>
+              
+              <h3 className="text-lg font-medium mb-4 text-yellow-400">
+                Watch on Main Streaming Platform
+              </h3>
               
               {downloadUrl ? (
                 <Button 

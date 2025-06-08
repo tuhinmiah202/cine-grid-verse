@@ -140,7 +140,7 @@ export const MovieLinkManager = ({ movies }: MovieLinkManagerProps) => {
         <CardHeader>
           <CardTitle className="text-white flex items-center">
             <Plus className="w-5 h-5 mr-2" />
-            Add Download Link
+            Add Watch Link
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -176,12 +176,12 @@ export const MovieLinkManager = ({ movies }: MovieLinkManagerProps) => {
           </div>
 
           <div>
-            <Label htmlFor="download-url" className="text-white">Download URL</Label>
+            <Label htmlFor="download-url" className="text-white">Watch URL</Label>
             <Input
               id="download-url"
               value={downloadUrl}
               onChange={(e) => setDownloadUrl(e.target.value)}
-              placeholder="Enter download URL..."
+              placeholder="Enter watch URL..."
               className="bg-gray-700 border-gray-600 text-white"
             />
           </div>
@@ -191,7 +191,7 @@ export const MovieLinkManager = ({ movies }: MovieLinkManagerProps) => {
             disabled={isLoading || !selectedMovie}
             className="w-full bg-green-600 hover:bg-green-700"
           >
-            {isLoading ? "Adding..." : "Add Download Link"}
+            {isLoading ? "Adding..." : "Add Watch Link"}
           </Button>
         </CardContent>
       </Card>
@@ -199,12 +199,12 @@ export const MovieLinkManager = ({ movies }: MovieLinkManagerProps) => {
       <Card className="bg-gray-800 border-gray-700">
         <CardHeader>
           <CardTitle className="text-white">
-            Existing Download Links ({movieLinks.length})
+            Existing Watch Links ({movieLinks.length})
           </CardTitle>
         </CardHeader>
         <CardContent>
           {movieLinks.length === 0 ? (
-            <p className="text-gray-400 text-center py-4">No download links added yet.</p>
+            <p className="text-gray-400 text-center py-4">No watch links added yet.</p>
           ) : (
             <div className="space-y-3">
               {movieLinks.map((link) => (

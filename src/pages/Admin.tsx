@@ -6,7 +6,7 @@ import { AdminMovieList } from "@/components/AdminMovieList";
 import { TMDBSearch } from "@/components/TMDBSearch";
 import { MovieLinkManager } from "@/components/MovieLinkManager";
 import { AdminPasswordProtection } from "@/components/AdminPasswordProtection";
-import { BulkImport } from "@/components/BulkImport";
+import { GenreBulkImport } from "@/components/GenreBulkImport";
 import { Movie } from "@/types/Movie";
 import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -152,7 +152,7 @@ const Admin = () => {
                     : 'text-gray-400 hover:text-white'
                 }`}
               >
-                Bulk Import
+                Genre Import
               </button>
               <button
                 onClick={() => setActiveTab('tmdb')}
@@ -188,7 +188,7 @@ const Admin = () => {
             </div>
 
             {activeTab === 'bulk' && (
-              <BulkImport onImportComplete={loadMovies} />
+              <GenreBulkImport onImportComplete={loadMovies} />
             )}
 
             {activeTab === 'tmdb' && (
