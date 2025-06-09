@@ -30,30 +30,18 @@ const Sitemap = () => {
     loadSitemap();
   }, []);
 
-  // Handle direct XML requests
+  // Handle direct XML requests by showing raw XML content
   useEffect(() => {
     if (sitemapXml && window.location.pathname === '/sitemap.xml') {
-      // Set proper content type for XML
-      document.contentType = 'application/xml';
+      // Set page title for XML view
       document.title = 'Sitemap';
       
-      // Replace page content with raw XML
-      const htmlContent = `<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="UTF-8">
-  <title>Sitemap</title>
-</head>
-<body>
-  <pre style="white-space: pre-wrap; font-family: monospace;">${sitemapXml.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</pre>
-</body>
-</html>`;
-
-      // For browsers that support it, show as XML
+      // For browsers requesting raw XML (like search engines)
       if (navigator.userAgent.includes('Googlebot') || window.location.search.includes('raw=true')) {
-        document.open();
-        document.write(sitemapXml);
-        document.close();
+        // Create a new response with proper XML content type
+        const blob = new Blob([sitemapXml], { type: 'application/xml' });
+        const url = URL.createObjectURL(blob);
+        window.location.href = url;
         return;
       }
     }
