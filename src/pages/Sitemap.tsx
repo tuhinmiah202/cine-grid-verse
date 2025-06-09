@@ -12,7 +12,7 @@ const Sitemap = () => {
         // First try to get saved sitemap
         let sitemap = getSavedSitemap();
         
-        // If no saved sitemap or it's old, generate new one
+        // If no saved sitemap, generate new one
         if (!sitemap) {
           console.log('Generating new sitemap...');
           sitemap = await generateSitemap();
@@ -30,19 +30,31 @@ const Sitemap = () => {
     loadSitemap();
   }, []);
 
-  // Set content type for XML
+  // Handle direct XML requests
   useEffect(() => {
-    if (sitemapXml) {
-      // This is a workaround for serving XML in a React app
-      const blob = new Blob([sitemapXml], { type: 'application/xml' });
-      const url = URL.createObjectURL(blob);
+    if (sitemapXml && window.location.pathname === '/sitemap.xml') {
+      // Set proper content type for XML
+      document.contentType = 'application/xml';
+      document.title = 'Sitemap';
       
-      // For direct XML viewing, we'll redirect to download
-      if (window.location.pathname === '/sitemap.xml') {
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = 'sitemap.xml';
-        link.click();
+      // Replace page content with raw XML
+      const htmlContent = `<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Sitemap</title>
+</head>
+<body>
+  <pre style="white-space: pre-wrap; font-family: monospace;">${sitemapXml.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</pre>
+</body>
+</html>`;
+
+      // For browsers that support it, show as XML
+      if (navigator.userAgent.includes('Googlebot') || window.location.search.includes('raw=true')) {
+        document.open();
+        document.write(sitemapXml);
+        document.close();
+        return;
       }
     }
   }, [sitemapXml]);
@@ -99,6 +111,15 @@ const Sitemap = () => {
             >
               Copy to Clipboard
             </button>
+
+            <a
+              href="/sitemap.xml?raw=true"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="bg-yellow-600 hover:bg-yellow-700 text-white px-4 py-2 rounded inline-block"
+            >
+              View Raw XML
+            </a>
           </div>
         </div>
       </div>
