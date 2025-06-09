@@ -12,10 +12,12 @@ const visited = new Set();
 async function crawl(url) {
   if (visited.has(url)) return [];
   visited.add(url);
+
   try {
     const res = await axios.get(url);
     const $ = cheerio.load(res.data);
     const links = new Set();
+
     $('a[href]').each((_, a) => {
       let href = $(a).attr('href');
       if (href && href.startsWith('/')) {
@@ -25,6 +27,7 @@ async function crawl(url) {
         }
       }
     });
+
     return Array.from(links);
   } catch (err) {
     console.error(`Error crawling ${url}:`, err.message);
@@ -50,7 +53,8 @@ async function buildSitemap() {
       <changefreq>weekly</changefreq>
       <priority>0.7</priority>
       <lastmod>${new Date().toISOString()}</lastmod>
-    </url>`).join('');
+    </url>
+  `).join('');
 
   return `<?xml version="1.0" encoding="UTF-8"?>
   <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
@@ -58,8 +62,10 @@ async function buildSitemap() {
   </urlset>`;
 }
 
-app.use(express.static(path.join(__dirname, '../client/dist'))); // Serve frontend
+// Serve frontend build files
+app.use(express.static(path.join(__dirname, '../client/dist')));
 
+// Sitemap endpoint
 app.get('/sitemap.xml', async (req, res) => {
   try {
     const sitemap = await buildSitemap();
@@ -71,6 +77,7 @@ app.get('/sitemap.xml', async (req, res) => {
   }
 });
 
+// Fallback route (for client-side routing)
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, '../client/dist/index.html'));
 });
