@@ -1,10 +1,11 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { ArrowLeft, Film, Database, LinkIcon } from "lucide-react";
+import { ArrowLeft, Film, Database, LinkIcon, Map } from "lucide-react";
 import { AdminForm } from "@/components/AdminForm";
 import { AdminMovieList } from "@/components/AdminMovieList";
 import { TMDBSearch } from "@/components/TMDBSearch";
 import { MovieLinkManager } from "@/components/MovieLinkManager";
+import { SitemapManager } from "@/components/SitemapManager";
 import { AdminPasswordProtection } from "@/components/AdminPasswordProtection";
 import { GenreBulkImport } from "@/components/GenreBulkImport";
 import { Movie } from "@/types/Movie";
@@ -13,7 +14,7 @@ import { supabase } from "@/integrations/supabase/client";
 
 const Admin = () => {
   const [movies, setMovies] = useState<Movie[]>([]);
-  const [activeTab, setActiveTab] = useState<'bulk' | 'tmdb' | 'manual' | 'links'>('bulk');
+  const [activeTab, setActiveTab] = useState<'bulk' | 'tmdb' | 'manual' | 'links' | 'sitemap'>('bulk');
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   const loadMovies = async () => {
@@ -185,6 +186,17 @@ const Admin = () => {
                 <LinkIcon className="w-4 h-4 mr-1 inline" />
                 Watch Links
               </button>
+              <button
+                onClick={() => setActiveTab('sitemap')}
+                className={`flex-1 py-2 px-3 rounded-md font-medium transition-colors text-sm ${
+                  activeTab === 'sitemap'
+                    ? 'bg-yellow-400 text-black'
+                    : 'text-gray-400 hover:text-white'
+                }`}
+              >
+                <Map className="w-4 h-4 mr-1 inline" />
+                Sitemap
+              </button>
             </div>
 
             {activeTab === 'bulk' && (
@@ -203,6 +215,10 @@ const Admin = () => {
 
             {activeTab === 'links' && (
               <MovieLinkManager movies={movies} />
+            )}
+
+            {activeTab === 'sitemap' && (
+              <SitemapManager />
             )}
           </div>
           
