@@ -2,6 +2,8 @@
 import { Button } from "@/components/ui/button";
 import { Movie } from "@/types/Movie";
 import { Trash2 } from "lucide-react";
+import { generateSitemap, saveSitemap } from "@/utils/sitemapGenerator";
+import { toast } from "@/hooks/use-toast";
 
 interface AdminMovieListProps {
   movies: Movie[];
@@ -9,6 +11,20 @@ interface AdminMovieListProps {
 }
 
 export const AdminMovieList = ({ movies, onDeleteMovie }: AdminMovieListProps) => {
+  const handleDeleteWithSitemapUpdate = async (id: string) => {
+    // Delete the movie first
+    onDeleteMovie(id);
+    
+    // Then update sitemap in background
+    try {
+      const sitemapXml = await generateSitemap();
+      await saveSitemap(sitemapXml);
+      console.log('Sitemap updated after movie deletion');
+    } catch (error) {
+      console.error('Error updating sitemap:', error);
+    }
+  };
+
   if (movies.length === 0) {
     return (
       <div className="bg-gray-800 p-6 rounded-lg text-center">
@@ -44,7 +60,7 @@ export const AdminMovieList = ({ movies, onDeleteMovie }: AdminMovieListProps) =
           <Button
             variant="destructive"
             size="sm"
-            onClick={() => onDeleteMovie(movie.id)}
+            onClick={() => handleDeleteWithSitemapUpdate(movie.id)}
             className="flex items-center"
           >
             <Trash2 className="w-4 h-4 mr-1" />
