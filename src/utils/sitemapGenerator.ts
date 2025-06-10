@@ -11,18 +11,19 @@ interface SitemapUrl {
 export const generateSitemap = async (): Promise<string> => {
   const baseUrl = 'https://movieshubbd.onrender.com';
   const urls: SitemapUrl[] = [];
+  const currentDate = new Date().toISOString().split('T')[0];
 
-  // Add static pages
+  // Add static pages with proper priorities
   urls.push({
     loc: baseUrl,
-    lastmod: new Date().toISOString().split('T')[0], // Format as YYYY-MM-DD
+    lastmod: currentDate,
     changefreq: 'daily',
     priority: '1.0'
   });
 
   urls.push({
     loc: `${baseUrl}/admin`,
-    lastmod: new Date().toISOString().split('T')[0],
+    lastmod: currentDate,
     changefreq: 'monthly',
     priority: '0.3'
   });
@@ -31,7 +32,7 @@ export const generateSitemap = async (): Promise<string> => {
     // Fetch all movies from database
     const { data: movies, error } = await supabase
       .from('movies')
-      .select('id, updated_at')
+      .select('id, updated_at, created_at')
       .order('updated_at', { ascending: false });
 
     if (!error && movies) {
@@ -39,8 +40,11 @@ export const generateSitemap = async (): Promise<string> => {
       movies.forEach((movie) => {
         const lastmod = movie.updated_at 
           ? new Date(movie.updated_at).toISOString().split('T')[0]
-          : new Date().toISOString().split('T')[0];
+          : movie.created_at 
+          ? new Date(movie.created_at).toISOString().split('T')[0]
+          : currentDate;
 
+        // Movie detail page
         urls.push({
           loc: `${baseUrl}/movie/${movie.id}`,
           lastmod,
@@ -48,7 +52,7 @@ export const generateSitemap = async (): Promise<string> => {
           priority: '0.8'
         });
 
-        // Add download pages
+        // Download page
         urls.push({
           loc: `${baseUrl}/download/${movie.id}`,
           lastmod,
@@ -61,16 +65,29 @@ export const generateSitemap = async (): Promise<string> => {
     console.error('Error fetching movies for sitemap:', error);
   }
 
-  // Generate valid XML according to sitemap protocol
-  const xmlHeader = '<?xml version="1.0" encoding="UTF-8"?>';
+  // Generate XML sitemap with proper formatting
+  const xmlDeclaration = '<?xml version="1.0" encoding="UTF-8"?>';
   const urlsetOpen = '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">';
   const urlsetClose = '</urlset>';
 
-  const urlEntries = urls.map(url => 
-    `  <url>\n    <loc>${escapeXml(url.loc)}</loc>\n    <lastmod>${url.lastmod}</lastmod>\n    <changefreq>${url.changefreq}</changefreq>\n    <priority>${url.priority}</priority>\n  </url>`
-  ).join('\n');
+  const urlEntries = urls.map(url => {
+    return `  <url>
+    <loc>${escapeXml(url.loc)}</loc>
+    <lastmod>${url.lastmod}</lastmod>
+    <changefreq>${url.changefreq}</changefreq>
+    <priority>${url.priority}</priority>
+  </url>`;
+  }).join('\n');
 
-  return `${xmlHeader}\n${urlsetOpen}\n${urlEntries}\n${urlsetClose}`;
+  const fullXml = `${xmlDeclaration}
+${urlsetOpen}
+${urlEntries}
+${urlsetClose}`;
+
+  // Save the generated sitemap
+  await saveSitemap(fullXml);
+  
+  return fullXml;
 };
 
 // Helper function to escape XML special characters

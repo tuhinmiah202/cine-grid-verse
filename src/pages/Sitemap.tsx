@@ -30,18 +30,19 @@ const Sitemap = () => {
     loadSitemap();
   }, []);
 
-  // Handle direct XML requests by showing raw XML content
+  // Handle sitemap.xml requests - serve raw XML for search engines
   useEffect(() => {
     if (sitemapXml && window.location.pathname === '/sitemap.xml') {
-      // Set page title for XML view
-      document.title = 'Sitemap';
+      // For search engines and raw XML requests, replace the entire page content
+      const isSearchEngine = navigator.userAgent.includes('Googlebot') || 
+                            navigator.userAgent.includes('Bingbot') ||
+                            window.location.search.includes('raw=true');
       
-      // For browsers requesting raw XML (like search engines)
-      if (navigator.userAgent.includes('Googlebot') || window.location.search.includes('raw=true')) {
-        // Create a new response with proper XML content type
-        const blob = new Blob([sitemapXml], { type: 'application/xml' });
-        const url = URL.createObjectURL(blob);
-        window.location.href = url;
+      if (isSearchEngine) {
+        // Replace page content with XML
+        document.open();
+        document.write(sitemapXml);
+        document.close();
         return;
       }
     }
@@ -75,7 +76,7 @@ const Sitemap = () => {
             </pre>
           </div>
           
-          <div className="mt-4 flex gap-4">
+          <div className="mt-4 flex gap-4 flex-wrap">
             <button
               onClick={() => {
                 const blob = new Blob([sitemapXml], { type: 'application/xml' });
@@ -108,6 +109,14 @@ const Sitemap = () => {
             >
               View Raw XML
             </a>
+          </div>
+
+          <div className="mt-6 p-4 bg-yellow-900 bg-opacity-50 rounded">
+            <h3 className="font-semibold text-yellow-300 mb-2">For Google Search Console:</h3>
+            <p className="text-sm text-yellow-200 mb-2">Submit this URL to Google Search Console:</p>
+            <code className="text-yellow-300 bg-gray-800 px-2 py-1 rounded">
+              https://movieshubbd.onrender.com/sitemap.xml
+            </code>
           </div>
         </div>
       </div>
