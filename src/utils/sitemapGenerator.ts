@@ -99,3 +99,25 @@ const escapeXml = (unsafe: string): string => {
     }
   });
 };
+const isBrowser = typeof window !== 'undefined';
+
+export const saveSitemap = async (sitemapXml: string): Promise<void> => {
+  if (!isBrowser) return;
+  try {
+    localStorage.setItem('sitemap_xml', sitemapXml);
+    localStorage.setItem('sitemap_generated_at', new Date().toISOString());
+    console.log('Sitemap saved to localStorage.');
+  } catch (error) {
+    console.error('Error saving sitemap:', error);
+  }
+};
+
+export const getSavedSitemap = async (): Promise<string | null> => {
+  if (!isBrowser) return null;
+  try {
+    return localStorage.getItem('sitemap_xml');
+  } catch (error) {
+    console.error('Error reading sitemap from localStorage:', error);
+    return null;
+  }
+};
