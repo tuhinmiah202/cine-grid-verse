@@ -1,3 +1,5 @@
+import { supabase } from './supabaseClient'; // Make sure this import path is correct
+
 interface SitemapUrl {
   loc: string;
   lastmod: string;
@@ -77,16 +79,6 @@ ${urlEntries}
 ${urlsetClose}`;
 };
 
-export const saveSitemap = async (sitemapXml: string): Promise<void> => {
-  try {
-    localStorage.setItem('sitemap_xml', sitemapXml);
-    localStorage.setItem('sitemap_generated_at', new Date().toISOString());
-    console.log('Sitemap saved to localStorage.');
-  } catch (error) {
-    console.error('Error saving sitemap:', error);
-  }
-};
-
 const escapeXml = (unsafe: string): string => {
   return unsafe.replace(/[<>&'"]/g, (c) => {
     switch (c) {
@@ -99,6 +91,7 @@ const escapeXml = (unsafe: string): string => {
     }
   });
 };
+
 const isBrowser = typeof window !== 'undefined';
 
 export const saveSitemap = async (sitemapXml: string): Promise<void> => {
