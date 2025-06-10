@@ -1,6 +1,3 @@
-
-import { supabase } from "@/integrations/supabase/client";
-
 interface SitemapUrl {
   loc: string;
   lastmod: string;
@@ -8,12 +5,12 @@ interface SitemapUrl {
   priority: string;
 }
 
+const baseUrl = 'https://movieshubbd.onrender.com';
+
 export const generateSitemap = async (): Promise<string> => {
-  const baseUrl = 'https://movieshubbd.onrender.com';
   const urls: SitemapUrl[] = [];
   const currentDate = new Date().toISOString().split('T')[0];
 
-  // Add static pages with proper priorities
   urls.push({
     loc: baseUrl,
     lastmod: currentDate,
@@ -29,22 +26,19 @@ export const generateSitemap = async (): Promise<string> => {
   });
 
   try {
-    // Fetch all movies from database
     const { data: movies, error } = await supabase
       .from('movies')
       .select('id, updated_at, created_at')
       .order('updated_at', { ascending: false });
 
     if (!error && movies) {
-      // Add movie detail pages
       movies.forEach((movie) => {
-        const lastmod = movie.updated_at 
+        const lastmod = movie.updated_at
           ? new Date(movie.updated_at).toISOString().split('T')[0]
-          : movie.created_at 
+          : movie.created_at
           ? new Date(movie.created_at).toISOString().split('T')[0]
           : currentDate;
 
-        // Movie detail page
         urls.push({
           loc: `${baseUrl}/movie/${movie.id}`,
           lastmod,
@@ -52,7 +46,6 @@ export const generateSitemap = async (): Promise<string> => {
           priority: '0.8'
         });
 
-        // Download page
         urls.push({
           loc: `${baseUrl}/download/${movie.id}`,
           lastmod,
@@ -62,10 +55,9 @@ export const generateSitemap = async (): Promise<string> => {
       });
     }
   } catch (error) {
-    console.error('Error fetching movies for sitemap:', error);
+    console.error('Error fetching movies:', error);
   }
 
-  // Generate XML sitemap with proper formatting
   const xmlDeclaration = '<?xml version="1.0" encoding="UTF-8"?>';
   const urlsetOpen = '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">';
   const urlsetClose = '</urlset>';
@@ -79,18 +71,22 @@ export const generateSitemap = async (): Promise<string> => {
   </url>`;
   }).join('\n');
 
-  const fullXml = `${xmlDeclaration}
+  return `${xmlDeclaration}
 ${urlsetOpen}
 ${urlEntries}
 ${urlsetClose}`;
-
-  // Save the generated sitemap
-  await saveSitemap(fullXml);
-  
-  return fullXml;
 };
 
-// Helper function to escape XML special characters
+export const saveSitemap = async (sitemapXml: string): Promise<void> => {
+  try {
+    localStorage.setItem('sitemap_xml', sitemapXml);
+    localStorage.setItem('sitemap_generated_at', new Date().toISOString());
+    console.log('Sitemap saved to localStorage.');
+  } catch (error) {
+    console.error('Error saving sitemap:', error);
+  }
+};
+
 const escapeXml = (unsafe: string): string => {
   return unsafe.replace(/[<>&'"]/g, (c) => {
     switch (c) {
@@ -102,24 +98,4 @@ const escapeXml = (unsafe: string): string => {
       default: return c;
     }
   });
-};
-
-export const saveSitemap = async (sitemapXml: string): Promise<void> => {
-  try {
-    // Store sitemap in localStorage for client-side serving
-    localStorage.setItem('sitemap_xml', sitemapXml);
-    localStorage.setItem('sitemap_generated_at', new Date().toISOString());
-    console.log('Sitemap saved successfully');
-  } catch (error) {
-    console.error('Error saving sitemap:', error);
-  }
-};
-
-export const getSavedSitemap = (): string | null => {
-  try {
-    return localStorage.getItem('sitemap_xml');
-  } catch (error) {
-    console.error('Error getting saved sitemap:', error);
-    return null;
-  }
 };
