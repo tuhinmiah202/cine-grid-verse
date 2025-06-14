@@ -56,27 +56,50 @@ const Index = () => {
   // Load movies from Supabase with error handling
   const loadMovies = useCallback(async () => {
     try {
-      const { data, error } = await supabase
+      console.log('Starting to load movies from database...');
+      
+      const { data, error, count } = await supabase
         .from('movies')
-        .select('*')
-        .order('created_at', { ascending: false })
-        .limit(100); // Limit initial load for better performance
+        .select('*', { count: 'exact' })
+        .order('created_at', { ascending: false });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Supabase error:', error);
+        throw error;
+      }
 
-      const formattedMovies: Movie[] = data.map(movie => ({
-        id: movie.id,
-        tmdb_id: movie.tmdb_id,
-        title: movie.title,
-        description: movie.description || "",
-        image: movie.image || "",
-        releaseDate: movie.release_date || "",
-        isReleased: movie.is_released ?? true,
-        category: movie.category || "",
-        rating: movie.rating
-      }));
+      console.log(`Database query successful. Found ${count} total movies in database.`);
+      console.log('First few movies:', data?.slice(0, 3));
 
-      setMovies(formattedMovies);
+      if (!data || data.length === 0) {
+        console.log('No movies found in database, using sample data');
+        toast({
+          title: "No Movies Found",
+          description: "No movies found in database. Using sample data.",
+          variant: "destructive"
+        });
+        setMovies(sampleMovies);
+      } else {
+        const formattedMovies: Movie[] = data.map(movie => ({
+          id: movie.id,
+          tmdb_id: movie.tmdb_id,
+          title: movie.title,
+          description: movie.description || "",
+          image: movie.image || "",
+          releaseDate: movie.release_date || "",
+          isReleased: movie.is_released ?? true,
+          category: movie.category || "",
+          rating: movie.rating
+        }));
+
+        console.log(`Successfully loaded ${formattedMovies.length} movies from database`);
+        setMovies(formattedMovies);
+        
+        toast({
+          title: "Movies Loaded",
+          description: `Successfully loaded ${formattedMovies.length} movies from database.`,
+        });
+      }
     } catch (error) {
       console.error('Error loading movies:', error);
       toast({
@@ -140,7 +163,7 @@ const Index = () => {
     prevPage
   } = usePagination({ 
     data: filteredMovies, 
-    itemsPerPage: 20 // Reduced for better loading
+    itemsPerPage: 20
   });
 
   const categories = useMemo(() => {
@@ -250,6 +273,12 @@ const Index = () => {
           {currentMovies.length === 0 ? (
             <div className="text-center py-6 sm:py-8">
               <p className="text-gray-400 text-sm sm:text-base">No movies found matching your criteria.</p>
+              <button 
+                onClick={loadMovies}
+                className="mt-4 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition-colors"
+              >
+                Reload Movies
+              </button>
             </div>
           ) : (
             <>
