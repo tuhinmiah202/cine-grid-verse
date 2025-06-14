@@ -10,7 +10,7 @@ const Sitemap = () => {
     const loadSitemap = async () => {
       try {
         // First try to get saved sitemap
-        let sitemap = getSavedSitemap();
+        let sitemap = await getSavedSitemap();
         
         // If no saved sitemap, generate new one
         if (!sitemap) {

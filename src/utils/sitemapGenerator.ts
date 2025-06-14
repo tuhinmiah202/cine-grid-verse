@@ -1,4 +1,5 @@
-import { supabase } from './supabaseClient'; // Make sure this import path is correct
+
+import { supabase } from './supabaseClient';
 
 interface SitemapUrl {
   loc: string;
