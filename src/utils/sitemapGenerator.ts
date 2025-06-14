@@ -14,6 +14,7 @@ export const generateSitemap = async (): Promise<string> => {
   const urls: SitemapUrl[] = [];
   const currentDate = new Date().toISOString().split('T')[0];
 
+  // Add static pages
   urls.push({
     loc: baseUrl,
     lastmod: currentDate,
@@ -113,5 +114,32 @@ export const getSavedSitemap = async (): Promise<string | null> => {
   } catch (error) {
     console.error('Error reading sitemap from localStorage:', error);
     return null;
+  }
+};
+
+// New function to handle sitemap.xml requests
+export const handleSitemapXmlRequest = async (): Promise<void> => {
+  try {
+    // Generate fresh sitemap
+    const sitemapXml = await generateSitemap();
+    
+    // Save it for future use
+    await saveSitemap(sitemapXml);
+    
+    // Set proper headers and serve XML
+    const response = new Response(sitemapXml, {
+      headers: {
+        'Content-Type': 'application/xml',
+        'Cache-Control': 'public, max-age=3600'
+      }
+    });
+    
+    // Replace current page with XML content
+    document.open();
+    document.write(sitemapXml);
+    document.close();
+    
+  } catch (error) {
+    console.error('Error serving sitemap:', error);
   }
 };

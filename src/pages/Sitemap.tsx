@@ -1,12 +1,23 @@
-
 import { useEffect, useState } from "react";
-import { generateSitemap, getSavedSitemap } from "@/utils/sitemapGenerator";
+import { generateSitemap, getSavedSitemap, handleSitemapXmlRequest } from "@/utils/sitemapGenerator";
 
 const Sitemap = () => {
   const [sitemapXml, setSitemapXml] = useState<string>("");
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    // Check if this is a request for raw XML
+    const isXmlRequest = window.location.pathname === '/sitemap.xml' ||
+                        window.location.search.includes('format=xml') ||
+                        window.location.search.includes('raw=true');
+
+    if (isXmlRequest) {
+      // Handle XML request immediately
+      handleSitemapXmlRequest();
+      return;
+    }
+
+    // Otherwise load sitemap for UI display
     const loadSitemap = async () => {
       try {
         // First try to get saved sitemap
@@ -29,24 +40,6 @@ const Sitemap = () => {
 
     loadSitemap();
   }, []);
-
-  // Handle sitemap.xml requests - serve raw XML for search engines
-  useEffect(() => {
-    if (sitemapXml && window.location.pathname === '/sitemap.xml') {
-      // For search engines and raw XML requests, replace the entire page content
-      const isSearchEngine = navigator.userAgent.includes('Googlebot') || 
-                            navigator.userAgent.includes('Bingbot') ||
-                            window.location.search.includes('raw=true');
-      
-      if (isSearchEngine) {
-        // Replace page content with XML
-        document.open();
-        document.write(sitemapXml);
-        document.close();
-        return;
-      }
-    }
-  }, [sitemapXml]);
 
   if (isLoading) {
     return (
@@ -102,7 +95,7 @@ const Sitemap = () => {
             </button>
 
             <a
-              href="/sitemap.xml?raw=true"
+              href="/sitemap.xml?format=xml"
               target="_blank"
               rel="noopener noreferrer"
               className="bg-yellow-600 hover:bg-yellow-700 text-white px-4 py-2 rounded inline-block"
@@ -117,6 +110,9 @@ const Sitemap = () => {
             <code className="text-yellow-300 bg-gray-800 px-2 py-1 rounded">
               https://movieshubbd.onrender.com/sitemap.xml
             </code>
+            <p className="text-xs text-yellow-200 mt-2">
+              Note: The XML will be served automatically when accessed by search engines.
+            </p>
           </div>
         </div>
       </div>
