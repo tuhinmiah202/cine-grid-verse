@@ -1,7 +1,6 @@
-
 import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
-import { ArrowLeft, Play, Clock } from "lucide-react";
+import { ArrowLeft, Play, Clock, Search } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Movie } from "@/types/Movie";
 import { Button } from "@/components/ui/button";
@@ -97,6 +96,20 @@ const Download = () => {
         variant: "destructive"
       });
     }
+  };
+
+  const handleFindStreaming = () => {
+    if (!movie) return;
+    
+    const searchQuery = `watch ${movie.title} online`;
+    const googleSearchUrl = `https://www.google.com/search?q=${encodeURIComponent(searchQuery)}`;
+    
+    window.open(googleSearchUrl, '_blank');
+    
+    toast({
+      title: "Opening Search",
+      description: `Searching for streaming options for ${movie.title}.`,
+    });
   };
 
   if (isLoading) {
@@ -195,31 +208,45 @@ const Download = () => {
                 Ready to Watch!
               </h2>
               
-              <h3 className="text-lg font-medium mb-4 text-yellow-400">
-                Watch on Main Streaming Platform
-              </h3>
-              
               {downloadUrl ? (
-                <Button 
-                  onClick={handleWatch}
-                  className="bg-red-600 hover:bg-red-700 text-white px-6 py-3 text-lg"
-                  size="lg"
-                >
-                  <Play className="w-5 h-5 mr-2" />
-                  Watch Now
-                </Button>
+                <>
+                  <h3 className="text-lg font-medium mb-4 text-yellow-400">
+                    Watch on Main Streaming Platform
+                  </h3>
+                  
+                  <Button 
+                    onClick={handleWatch}
+                    className="bg-red-600 hover:bg-red-700 text-white px-6 py-3 text-lg mb-3"
+                    size="lg"
+                  >
+                    <Play className="w-5 h-5 mr-2" />
+                    Watch Now
+                  </Button>
+                  
+                  <p className="text-gray-400 text-sm">
+                    Click to start watching
+                  </p>
+                </>
               ) : (
                 <div className="text-center">
-                  <p className="text-yellow-400 mb-3">Watch link not available</p>
+                  <h3 className="text-lg font-medium mb-4 text-yellow-400">
+                    Streaming Link Not Available
+                  </h3>
+                  
+                  <Button 
+                    onClick={handleFindStreaming}
+                    className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 text-lg mb-3"
+                    size="lg"
+                  >
+                    <Search className="w-5 h-5 mr-2" />
+                    Find Streaming Options
+                  </Button>
+                  
                   <p className="text-gray-400 text-sm">
-                    Please contact admin to add watch link for this movie
+                    Search for streaming platforms that have this movie
                   </p>
                 </div>
               )}
-              
-              <p className="text-gray-400 mt-3 text-sm">
-                {downloadUrl ? "Click to start watching" : "Watch link will be provided by admin"}
-              </p>
             </div>
           )}
 
