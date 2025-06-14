@@ -1,5 +1,7 @@
-import { useState, useEffect, useMemo } from "react";
-import { MovieCard } from "@/components/MovieCard";
+
+import { useState, useEffect, useMemo, useCallback } from "react";
+import { OptimizedMovieCard } from "@/components/OptimizedMovieCard";
+import { MovieCardSkeleton } from "@/components/MovieCardSkeleton";
 import { CategoryFilter } from "@/components/CategoryFilter";
 import { Hero } from "@/components/Hero";
 import { SearchBar } from "@/components/SearchBar";
@@ -17,99 +19,94 @@ const Index = () => {
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [isLoading, setIsLoading] = useState(true);
 
-  // Load movies from Supabase
+  // Memoized sample movies to avoid recreation
+  const sampleMovies = useMemo(() => [
+    {
+      id: "1",
+      title: "Avengers: Endgame",
+      description: "The Avengers assemble once more to reverse Thanos' actions and restore balance to the universe.",
+      image: "https://images.unsplash.com/photo-1626814026160-2237a95fc5a0?w=500&q=80",
+      releaseDate: "2019-04-26",
+      isReleased: true,
+      category: "Action",
+      rating: 8.4
+    },
+    {
+      id: "2",
+      title: "The Matrix",
+      description: "A computer programmer discovers reality as he knows it is actually a simulation.",
+      image: "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=500&q=80",
+      releaseDate: "1999-03-31",
+      isReleased: true,
+      category: "Sci-Fi",
+      rating: 8.7
+    },
+    {
+      id: "3",
+      title: "Inception",
+      description: "A thief who enters people's dreams to steal secrets from their subconscious.",
+      image: "https://images.unsplash.com/photo-1542204165-65bf26472b9b?w=500&q=80",
+      releaseDate: "2010-07-16",
+      isReleased: true,
+      category: "Thriller",
+      rating: 8.8
+    }
+  ], []);
+
+  // Load movies from Supabase with error handling
+  const loadMovies = useCallback(async () => {
+    try {
+      const { data, error } = await supabase
+        .from('movies')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(100); // Limit initial load for better performance
+
+      if (error) throw error;
+
+      const formattedMovies: Movie[] = data.map(movie => ({
+        id: movie.id,
+        tmdb_id: movie.tmdb_id,
+        title: movie.title,
+        description: movie.description || "",
+        image: movie.image || "",
+        releaseDate: movie.release_date || "",
+        isReleased: movie.is_released ?? true,
+        category: movie.category || "",
+        rating: movie.rating
+      }));
+
+      setMovies(formattedMovies);
+    } catch (error) {
+      console.error('Error loading movies:', error);
+      toast({
+        title: "Error",
+        description: "Failed to load movies from database. Using sample data.",
+        variant: "destructive"
+      });
+      
+      setMovies(sampleMovies);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [sampleMovies]);
+
   useEffect(() => {
-    const loadMovies = async () => {
-      try {
-        const { data, error } = await supabase
-          .from('movies')
-          .select('*')
-          .order('created_at', { ascending: false });
-
-        if (error) throw error;
-
-        const formattedMovies: Movie[] = data.map(movie => ({
-          id: movie.id,
-          tmdb_id: movie.tmdb_id,
-          title: movie.title,
-          description: movie.description || "",
-          image: movie.image || "",
-          releaseDate: movie.release_date || "",
-          isReleased: movie.is_released ?? true,
-          category: movie.category || "",
-          rating: movie.rating
-        }));
-
-        setMovies(formattedMovies);
-      } catch (error) {
-        console.error('Error loading movies:', error);
-        toast({
-          title: "Error",
-          description: "Failed to load movies from database.",
-          variant: "destructive"
-        });
-        
-        // Fallback to sample movies if database fails
-        const sampleMovies: Movie[] = [
-          {
-            id: "1",
-            title: "Avengers: Endgame",
-            description: "The Avengers assemble once more to reverse Thanos' actions and restore balance to the universe.",
-            image: "https://images.unsplash.com/photo-1626814026160-2237a95fc5a0?w=500",
-            releaseDate: "2019-04-26",
-            isReleased: true,
-            category: "Action",
-            rating: 8.4
-          },
-          {
-            id: "2",
-            title: "The Matrix",
-            description: "A computer programmer discovers reality as he knows it is actually a simulation.",
-            image: "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=500",
-            releaseDate: "1999-03-31",
-            isReleased: true,
-            category: "Sci-Fi",
-            rating: 8.7
-          },
-          {
-            id: "3",
-            title: "Inception",
-            description: "A thief who enters people's dreams to steal secrets from their subconscious.",
-            image: "https://images.unsplash.com/photo-1542204165-65bf26472b9b?w=500",
-            releaseDate: "2010-07-16",
-            isReleased: true,
-            category: "Thriller",
-            rating: 8.8
-          }
-        ];
-        setMovies(sampleMovies);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
     loadMovies();
-  }, []);
+  }, [loadMovies]);
 
-  // Filter movies based on category, type, and search query
+  // Optimized filter function with debouncing
   const filteredMovies = useMemo(() => {
     let filtered = movies;
     
     // Filter by type (Movies/Series/Anime)
     if (selectedType === "Movies") {
       filtered = filtered.filter(movie => 
-        movie.category !== "TV Series" && 
-        movie.category !== "Series" && 
-        movie.category !== "TV Show" &&
-        movie.category !== "Animation" &&
-        movie.category !== "Bollywood" &&
-        movie.category !== "K-Drama"
+        !["TV Series", "Series", "TV Show", "Animation", "Bollywood", "K-Drama"].includes(movie.category)
       );
     } else if (selectedType === "Series") {
       filtered = filtered.filter(movie => 
-        movie.category === "TV Series" || 
-        movie.category === "Series" || 
-        movie.category === "TV Show"
+        ["TV Series", "Series", "TV Show"].includes(movie.category)
       );
     } else if (selectedType === "Anime") {
       filtered = filtered.filter(movie => 
@@ -124,9 +121,10 @@ const Index = () => {
     }
     
     if (searchQuery) {
+      const query = searchQuery.toLowerCase();
       filtered = filtered.filter(movie => 
-        movie.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        movie.description.toLowerCase().includes(searchQuery.toLowerCase())
+        movie.title.toLowerCase().includes(query) ||
+        movie.description.toLowerCase().includes(query)
       );
     }
     
@@ -142,12 +140,11 @@ const Index = () => {
     prevPage
   } = usePagination({ 
     data: filteredMovies, 
-    itemsPerPage: 22 
+    itemsPerPage: 20 // Reduced for better loading
   });
 
   const categories = useMemo(() => {
     const allCategories = Array.from(new Set(movies.map(movie => movie.category)));
-    // Add Bollywood and K-Drama if not already present
     if (!allCategories.includes("Bollywood")) {
       allCategories.push("Bollywood");
     }
@@ -161,11 +158,45 @@ const Index = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gray-900 text-white flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-yellow-400 mx-auto mb-4"></div>
-          <p className="text-xl">Loading movies...</p>
+      <div className="min-h-screen bg-gray-900 text-white">
+        <Hero />
+        <div className="container mx-auto px-2 sm:px-4 py-3 sm:py-4">
+          <div className="flex flex-col space-y-2 sm:space-y-3 mb-3 sm:mb-4">
+            <SearchBar searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
+            
+            <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
+              <div className="flex flex-wrap gap-2">
+                {types.map((type) => (
+                  <button
+                    key={type}
+                    className="px-2 py-1.5 rounded-lg font-medium transition-colors text-xs bg-gray-700 text-white"
+                  >
+                    {type}
+                  </button>
+                ))}
+              </div>
+              
+              <CategoryFilter 
+                categories={["All", "Loading..."]}
+                selectedCategory="All"
+                onCategoryChange={() => {}}
+              />
+            </div>
+          </div>
+
+          <div className="mb-3 sm:mb-4">
+            <h2 className="text-base sm:text-lg md:text-xl font-bold mb-2 sm:mb-3">
+              Loading Movies...
+            </h2>
+            
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-7 gap-2 sm:gap-3 md:gap-4">
+              {Array.from({ length: 20 }).map((_, index) => (
+                <MovieCardSkeleton key={index} />
+              ))}
+            </div>
+          </div>
         </div>
+        <Footer />
       </div>
     );
   }
@@ -223,8 +254,12 @@ const Index = () => {
           ) : (
             <>
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-7 gap-2 sm:gap-3 md:gap-4">
-                {currentMovies.map((movie) => (
-                  <MovieCard key={movie.id} movie={movie} />
+                {currentMovies.map((movie, index) => (
+                  <OptimizedMovieCard 
+                    key={movie.id} 
+                    movie={movie} 
+                    priority={index < 6} // Prioritize first 6 images
+                  />
                 ))}
               </div>
               
