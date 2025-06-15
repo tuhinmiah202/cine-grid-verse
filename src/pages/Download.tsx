@@ -210,9 +210,9 @@ const Download = () => {
               
               {downloadUrl ? (
                 <>
-                  <h3 className="text-lg font-medium mb-4 text-yellow-400">
-                    Watch on Main Streaming Platform
-                  </h3>
+                  <p className="text-sm text-gray-300 mb-4">
+                    👉 Available on platforms like Netflix, Disney+, etc.
+                  </p>
                   
                   <Button 
                     onClick={handleWatch}
@@ -229,9 +229,9 @@ const Download = () => {
                 </>
               ) : (
                 <div className="text-center">
-                  <h3 className="text-lg font-medium mb-4 text-yellow-400">
-                    Streaming Link Not Available
-                  </h3>
+                  <p className="text-sm text-gray-300 mb-4">
+                    👉 Find legal streaming platforms (e.g., Netflix, Disney+, Prime)
+                  </p>
                   
                   <Button 
                     onClick={handleFindStreaming}

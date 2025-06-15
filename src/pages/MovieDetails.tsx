@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { Calendar, Star, ArrowLeft, Clock, Play } from "lucide-react";
@@ -203,6 +202,9 @@ const MovieDetails = () => {
 
             {/* Watch Now Button */}
             <div className="mb-4">
+              <p className="text-sm text-gray-300 mb-2">
+                👉 Available on platforms like Netflix, Disney+, etc.
+              </p>
               <Link to={`/download/${movie.id}`}>
                 <Button className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 text-sm sm:text-base">
                   <Play className="w-4 h-4 mr-2" />

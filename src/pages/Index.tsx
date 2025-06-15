@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { OptimizedMovieCard } from "@/components/OptimizedMovieCard";
 import { MovieCardSkeleton } from "@/components/MovieCardSkeleton";
@@ -94,11 +93,6 @@ const Index = () => {
 
         console.log(`Successfully loaded ${formattedMovies.length} movies from database`);
         setMovies(formattedMovies);
-        
-        toast({
-          title: "Movies Loaded",
-          description: `Successfully loaded ${formattedMovies.length} movies from database.`,
-        });
       }
     } catch (error) {
       console.error('Error loading movies:', error);
