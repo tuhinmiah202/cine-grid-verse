@@ -1,34 +1,55 @@
+
 import { useEffect, useState } from "react";
-import { generateSitemap, getSavedSitemap, handleSitemapXmlRequest } from "@/utils/sitemapGenerator";
+import { generateSitemap, getSavedSitemap } from "@/utils/sitemapGenerator";
 
 const Sitemap = () => {
   const [sitemapXml, setSitemapXml] = useState<string>("");
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Check if this is a request for raw XML
+    // Check if this is a direct XML request
     const isXmlRequest = window.location.pathname === '/sitemap.xml' ||
                         window.location.search.includes('format=xml') ||
                         window.location.search.includes('raw=true');
 
     if (isXmlRequest) {
-      // Handle XML request immediately
-      handleSitemapXmlRequest();
+      // For XML requests, immediately serve XML content
+      const serveXml = async () => {
+        try {
+          let sitemap = await getSavedSitemap();
+          if (!sitemap) {
+            sitemap = await generateSitemap();
+          }
+          
+          // Clear the page and serve pure XML
+          document.open();
+          document.write(sitemap || "");
+          document.close();
+          
+          // Set the content type if possible
+          if (document.contentType) {
+            document.contentType = 'application/xml';
+          }
+        } catch (error) {
+          console.error('Error serving XML:', error);
+          document.open();
+          document.write('<?xml version="1.0" encoding="UTF-8"?><error>Failed to generate sitemap</error>');
+          document.close();
+        }
+      };
+      
+      serveXml();
       return;
     }
 
-    // Otherwise load sitemap for UI display
+    // For regular UI requests, load sitemap for display
     const loadSitemap = async () => {
       try {
-        // First try to get saved sitemap
         let sitemap = await getSavedSitemap();
-        
-        // If no saved sitemap, generate new one
         if (!sitemap) {
           console.log('Generating new sitemap...');
           sitemap = await generateSitemap();
         }
-
         setSitemapXml(sitemap || "");
       } catch (error) {
         console.error('Error loading sitemap:', error);
@@ -94,25 +115,32 @@ const Sitemap = () => {
               Copy to Clipboard
             </button>
 
-            <a
-              href="/sitemap.xml?format=xml"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="bg-yellow-600 hover:bg-yellow-700 text-white px-4 py-2 rounded inline-block"
+            <button
+              onClick={() => {
+                // Create a new window with pure XML content
+                const newWindow = window.open('', '_blank');
+                if (newWindow) {
+                  newWindow.document.open();
+                  newWindow.document.write(sitemapXml);
+                  newWindow.document.close();
+                  newWindow.document.contentType = 'application/xml';
+                }
+              }}
+              className="bg-yellow-600 hover:bg-yellow-700 text-white px-4 py-2 rounded"
             >
               View Raw XML
-            </a>
+            </button>
           </div>
 
           <div className="mt-6 p-4 bg-yellow-900 bg-opacity-50 rounded">
             <h3 className="font-semibold text-yellow-300 mb-2">For Google Search Console:</h3>
-            <p className="text-sm text-yellow-200 mb-2">Submit this URL to Google Search Console:</p>
-            <code className="text-yellow-300 bg-gray-800 px-2 py-1 rounded">
-              https://movieshubbd.onrender.com/sitemap.xml
-            </code>
-            <p className="text-xs text-yellow-200 mt-2">
-              Note: The XML will be served automatically when accessed by search engines.
+            <p className="text-sm text-yellow-200 mb-2">
+              Currently there's a technical issue with serving XML directly. 
+              Use the "Download XML" button and upload the file manually to Google Search Console.
             </p>
+            <code className="text-yellow-300 bg-gray-800 px-2 py-1 rounded">
+              Alternative: Upload downloaded sitemap.xml file directly
+            </code>
           </div>
         </div>
       </div>

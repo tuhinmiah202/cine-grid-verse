@@ -62,10 +62,7 @@ export const generateSitemap = async (): Promise<string> => {
     console.error('Error fetching movies:', error);
   }
 
-  const xmlDeclaration = '<?xml version="1.0" encoding="UTF-8"?>';
-  const urlsetOpen = '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">';
-  const urlsetClose = '</urlset>';
-
+  // Generate clean XML without any extra content
   const urlEntries = urls.map(url => {
     return `  <url>
     <loc>${escapeXml(url.loc)}</loc>
@@ -75,10 +72,11 @@ export const generateSitemap = async (): Promise<string> => {
   </url>`;
   }).join('\n');
 
-  return `${xmlDeclaration}
-${urlsetOpen}
+  // Return clean XML with proper formatting
+  return `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 ${urlEntries}
-${urlsetClose}`;
+</urlset>`;
 };
 
 const escapeXml = (unsafe: string): string => {
@@ -117,29 +115,16 @@ export const getSavedSitemap = async (): Promise<string | null> => {
   }
 };
 
-// New function to handle sitemap.xml requests
-export const handleSitemapXmlRequest = async (): Promise<void> => {
+// Create a static sitemap file that can be served directly
+export const createStaticSitemap = async (): Promise<void> => {
   try {
-    // Generate fresh sitemap
     const sitemapXml = await generateSitemap();
-    
-    // Save it for future use
     await saveSitemap(sitemapXml);
     
-    // Set proper headers and serve XML
-    const response = new Response(sitemapXml, {
-      headers: {
-        'Content-Type': 'application/xml',
-        'Cache-Control': 'public, max-age=3600'
-      }
-    });
-    
-    // Replace current page with XML content
-    document.open();
-    document.write(sitemapXml);
-    document.close();
-    
+    // Log the XML content for manual file creation
+    console.log('Generated sitemap XML:', sitemapXml);
+    console.log('Copy this content to public/sitemap-static.xml for direct serving');
   } catch (error) {
-    console.error('Error serving sitemap:', error);
+    console.error('Error creating static sitemap:', error);
   }
 };
