@@ -1,2 +1,6 @@
 
+# Serve sitemap as XML with proper content type
+/sitemap.xml /sitemap.xml 200! Content-Type:application/xml
+
+# Default SPA redirect
 /*    /index.html   200
