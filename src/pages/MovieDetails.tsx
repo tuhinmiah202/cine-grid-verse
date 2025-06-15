@@ -5,6 +5,14 @@ import { supabase } from "@/integrations/supabase/client";
 import { Movie } from "@/types/Movie";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/hooks/use-toast";
+import { OptimizedMovieCard } from "@/components/OptimizedMovieCard";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "@/components/ui/carousel";
 
 interface TMDBMovieDetails {
   id: number;
@@ -33,10 +41,48 @@ const MovieDetails = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isLoadingDetails, setIsLoadingDetails] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [relatedMovies, setRelatedMovies] = useState<Movie[]>([]);
 
   useEffect(() => {
+    const fetchRelatedMovies = async (category: string, currentMovieId: string) => {
+      if (!category) return;
+      try {
+        const { data, error } = await supabase
+          .from('movies')
+          .select('*')
+          .eq('category', category)
+          .neq('id', currentMovieId)
+          .limit(10);
+
+        if (error) throw error;
+        
+        const mappedMovies: Movie[] = data.map(m => ({
+          id: m.id,
+          tmdb_id: m.tmdb_id,
+          title: m.title,
+          description: m.description || "",
+          image: m.image || "",
+          releaseDate: m.release_date || "",
+          isReleased: m.is_released ?? true,
+          category: m.category || "",
+          rating: m.rating
+        }));
+
+        setRelatedMovies(mappedMovies);
+      } catch (err) {
+        console.error("Failed to fetch related movies:", err);
+      }
+    };
+
     const loadMovieDetails = async () => {
       if (!id) return;
+
+      // Reset state for page transitions
+      setIsLoading(true);
+      setMovie(null);
+      setMovieDetails(null);
+      setRelatedMovies([]);
+      setError(null);
 
       try {
         // First, get the movie from our database (fast)
@@ -62,7 +108,7 @@ const MovieDetails = () => {
         };
 
         setMovie(mappedMovie);
-        setIsLoading(false);
+        fetchRelatedMovies(mappedMovie.category, mappedMovie.id);
 
         // Then load TMDB details in background (slower)
         if (movieData.tmdb_id) {
@@ -86,12 +132,13 @@ const MovieDetails = () => {
       } catch (error) {
         console.error('Error loading movie details:', error);
         setError('Failed to load movie details');
-        setIsLoading(false);
         toast({
           title: "Error",
           description: "Failed to load movie details.",
           variant: "destructive"
         });
+      } finally {
+        setIsLoading(false);
       }
     };
 
@@ -261,6 +308,30 @@ const MovieDetails = () => {
           </div>
         </div>
       </div>
+
+      {/* Related Movies Section */}
+      {relatedMovies.length > 0 && (
+        <div className="container mx-auto px-4 py-8 border-t border-gray-700">
+          <h2 className="text-2xl font-bold mb-6 text-yellow-400">Related Movies & Shows</h2>
+          <Carousel
+            opts={{
+              align: "start",
+              loop: false,
+            }}
+            className="w-full"
+          >
+            <CarouselContent className="-ml-2">
+              {relatedMovies.map((relatedMovie) => (
+                <CarouselItem key={relatedMovie.id} className="pl-2 sm:basis-1/2 md:basis-1/3 lg:basis-1/4 xl:basis-1/5">
+                  <OptimizedMovieCard movie={relatedMovie} />
+                </CarouselItem>
+              ))}
+            </CarouselContent>
+            <CarouselPrevious className="text-white bg-black bg-opacity-50 hover:bg-opacity-75" />
+            <CarouselNext className="text-white bg-black bg-opacity-75 hover:bg-black" />
+          </Carousel>
+        </div>
+      )}
     </div>
   );
 };
