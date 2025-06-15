@@ -1,3 +1,6 @@
 
+# Sitemap redirect with proper headers
+/sitemap.xml    /sitemap-static.xml    200!   Content-Type:application/xml
+
 # Default SPA redirect (must be last)
 /*    /index.html   200
