@@ -1,6 +1,6 @@
 
 import { useEffect, useState } from "react";
-import { generateSitemap, getSavedSitemap } from "@/utils/sitemapGenerator";
+import { generateSitemap, getSavedSitemap, createStaticSitemap } from "@/utils/sitemapGenerator";
 
 const Sitemap = () => {
   const [sitemapXml, setSitemapXml] = useState<string>("");
@@ -25,11 +25,6 @@ const Sitemap = () => {
           document.open();
           document.write(sitemap || "");
           document.close();
-          
-          // Set the content type if possible
-          if (document.contentType) {
-            document.contentType = 'application/xml';
-          }
         } catch (error) {
           console.error('Error serving XML:', error);
           document.open();
@@ -61,6 +56,16 @@ const Sitemap = () => {
 
     loadSitemap();
   }, []);
+
+  const handleGenerateStatic = async () => {
+    try {
+      await createStaticSitemap();
+      alert('Static sitemap generated! Check console for XML content to copy to public/sitemap-static.xml');
+    } catch (error) {
+      console.error('Error generating static sitemap:', error);
+      alert('Error generating static sitemap');
+    }
+  };
 
   if (isLoading) {
     return (
@@ -123,24 +128,30 @@ const Sitemap = () => {
                   newWindow.document.open();
                   newWindow.document.write(sitemapXml);
                   newWindow.document.close();
-                  newWindow.document.contentType = 'application/xml';
                 }
               }}
               className="bg-yellow-600 hover:bg-yellow-700 text-white px-4 py-2 rounded"
             >
               View Raw XML
             </button>
+
+            <button
+              onClick={handleGenerateStatic}
+              className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded"
+            >
+              Generate Static File
+            </button>
           </div>
 
-          <div className="mt-6 p-4 bg-yellow-900 bg-opacity-50 rounded">
-            <h3 className="font-semibold text-yellow-300 mb-2">For Google Search Console:</h3>
-            <p className="text-sm text-yellow-200 mb-2">
-              Currently there's a technical issue with serving XML directly. 
-              Use the "Download XML" button and upload the file manually to Google Search Console.
-            </p>
-            <code className="text-yellow-300 bg-gray-800 px-2 py-1 rounded">
-              Alternative: Upload downloaded sitemap.xml file directly
-            </code>
+          <div className="mt-6 p-4 bg-green-900 bg-opacity-50 rounded">
+            <h3 className="font-semibold text-green-300 mb-2">Static Sitemap Solution:</h3>
+            <ol className="text-sm text-green-200 space-y-1 list-decimal list-inside">
+              <li>Click "Generate Static File" button above</li>
+              <li>Copy the XML content from the console</li>
+              <li>Create a file named "sitemap-static.xml" in the public folder</li>
+              <li>Paste the XML content into that file</li>
+              <li>Your sitemap will be accessible at: <code>/sitemap-static.xml</code></li>
+            </ol>
           </div>
         </div>
       </div>

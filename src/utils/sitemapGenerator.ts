@@ -1,4 +1,3 @@
-
 import { supabase } from './supabaseClient';
 
 interface SitemapUrl {
@@ -122,8 +121,14 @@ export const createStaticSitemap = async (): Promise<void> => {
     await saveSitemap(sitemapXml);
     
     // Log the XML content for manual file creation
-    console.log('Generated sitemap XML:', sitemapXml);
-    console.log('Copy this content to public/sitemap-static.xml for direct serving');
+    console.log('=== COPY THIS CONTENT TO public/sitemap-static.xml ===');
+    console.log(sitemapXml);
+    console.log('=== END OF SITEMAP CONTENT ===');
+    console.log('');
+    console.log('Instructions:');
+    console.log('1. Copy the XML content above');
+    console.log('2. Replace the content in public/sitemap-static.xml');
+    console.log('3. Your sitemap will be available at /sitemap.xml (redirects to /sitemap-static.xml)');
   } catch (error) {
     console.error('Error creating static sitemap:', error);
   }
