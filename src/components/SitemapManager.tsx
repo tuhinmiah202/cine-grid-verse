@@ -3,29 +3,28 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { RefreshCw, Download, ExternalLink } from "lucide-react";
-import { generateSitemap, saveSitemap } from "@/utils/sitemapGenerator";
+import { generateSitemap, downloadSitemap } from "@/utils/sitemapGenerator";
 import { toast } from "@/hooks/use-toast";
 
 export const SitemapManager = () => {
   const [isGenerating, setIsGenerating] = useState(false);
-  const [lastGenerated, setLastGenerated] = useState<string | null>(
-    localStorage.getItem('sitemap_generated_at')
-  );
 
-  const handleGenerateSitemap = async () => {
+  const handleGenerateAndDownload = async () => {
     setIsGenerating(true);
     try {
       console.log('Generating sitemap...');
       const sitemapXml = await generateSitemap();
-      await saveSitemap(sitemapXml);
-      
-      const now = new Date().toISOString();
-      setLastGenerated(now);
+      downloadSitemap(sitemapXml);
       
       toast({
         title: "Success",
-        description: "Sitemap generated and saved successfully!",
+        description: "Sitemap generated and download started.",
       });
+      
+      console.log('=== SITEMAP CONTENT FOR public/sitemap.xml ===');
+      console.log(sitemapXml);
+      console.log('==============================================');
+
     } catch (error) {
       console.error('Error generating sitemap:', error);
       toast({
@@ -35,24 +34,6 @@ export const SitemapManager = () => {
       });
     } finally {
       setIsGenerating(false);
-    }
-  };
-
-  const handleDownloadSitemap = () => {
-    const savedSitemap = localStorage.getItem('sitemap_xml');
-    if (savedSitemap) {
-      const blob = new Blob([savedSitemap], { type: 'application/xml' });
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = 'sitemap.xml';
-      link.click();
-    } else {
-      toast({
-        title: "No Sitemap",
-        description: "Please generate a sitemap first.",
-        variant: "destructive"
-      });
     }
   };
 
@@ -66,31 +47,17 @@ export const SitemapManager = () => {
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="text-sm text-gray-400">
-          <p>Generate and manage your website's XML sitemap for better SEO.</p>
-          {lastGenerated && (
-            <p className="mt-2">
-              Last generated: {new Date(lastGenerated).toLocaleString()}
-            </p>
-          )}
+          <p>Generate an updated sitemap for your website. This is needed for good SEO.</p>
         </div>
 
         <div className="flex flex-col sm:flex-row gap-3">
           <Button
-            onClick={handleGenerateSitemap}
+            onClick={handleGenerateAndDownload}
             disabled={isGenerating}
             className="bg-blue-600 hover:bg-blue-700 flex-1"
           >
-            <RefreshCw className={`w-4 h-4 mr-2 ${isGenerating ? 'animate-spin' : ''}`} />
-            {isGenerating ? 'Generating...' : 'Generate Sitemap'}
-          </Button>
-
-          <Button
-            onClick={handleDownloadSitemap}
-            variant="outline"
-            className="border-gray-600 text-gray-300 hover:text-white flex-1"
-          >
-            <Download className="w-4 h-4 mr-2" />
-            Download XML
+            <Download className={`w-4 h-4 mr-2 ${isGenerating ? 'animate-spin' : ''}`} />
+            {isGenerating ? 'Generating...' : 'Generate & Download Sitemap'}
           </Button>
 
           <Button
@@ -99,17 +66,20 @@ export const SitemapManager = () => {
             className="border-gray-600 text-gray-300 hover:text-white flex-1"
           >
             <ExternalLink className="w-4 h-4 mr-2" />
-            View Sitemap
+            View Current Live Sitemap
           </Button>
         </div>
 
         <div className="bg-gray-700 p-3 rounded text-xs text-gray-300">
-          <h4 className="font-semibold mb-2">Automatic Updates:</h4>
-          <ul className="space-y-1">
-            <li>• Generate sitemap after adding/removing movies</li>
-            <li>• Submit sitemap URL to search engines: <code>/sitemap.xml</code></li>
-            <li>• Sitemap includes all movie pages and download links</li>
-          </ul>
+          <h4 className="font-semibold mb-2">How to Update Your Sitemap:</h4>
+          <ol className="space-y-1 list-decimal list-inside">
+            <li>Click "Generate & Download Sitemap". A file named <code>sitemap.xml</code> will be downloaded.</li>
+            <li>Open the downloaded file in a text editor.</li>
+            <li>Copy all the content from the downloaded file.</li>
+            <li>In the codebase, open the file <code>public/sitemap.xml</code>.</li>
+            <li>Replace all the content in <code>public/sitemap.xml</code> with the content you copied.</li>
+            <li>Once you save and deploy this change, the live sitemap will be updated.</li>
+          </ol>
         </div>
       </CardContent>
     </Card>

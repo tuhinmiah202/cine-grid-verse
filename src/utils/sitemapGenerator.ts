@@ -1,3 +1,4 @@
+
 import { supabase } from './supabaseClient';
 
 interface SitemapUrl {
@@ -61,7 +62,6 @@ export const generateSitemap = async (): Promise<string> => {
     console.error('Error fetching movies:', error);
   }
 
-  // Generate clean XML without any extra content
   const urlEntries = urls.map(url => {
     return `  <url>
     <loc>${escapeXml(url.loc)}</loc>
@@ -71,7 +71,6 @@ export const generateSitemap = async (): Promise<string> => {
   </url>`;
   }).join('\n');
 
-  // Return clean XML with proper formatting
   return `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 ${urlEntries}
@@ -91,45 +90,14 @@ const escapeXml = (unsafe: string): string => {
   });
 };
 
-const isBrowser = typeof window !== 'undefined';
-
-export const saveSitemap = async (sitemapXml: string): Promise<void> => {
-  if (!isBrowser) return;
-  try {
-    localStorage.setItem('sitemap_xml', sitemapXml);
-    localStorage.setItem('sitemap_generated_at', new Date().toISOString());
-    console.log('Sitemap saved to localStorage.');
-  } catch (error) {
-    console.error('Error saving sitemap:', error);
-  }
-};
-
-export const getSavedSitemap = async (): Promise<string | null> => {
-  if (!isBrowser) return null;
-  try {
-    return localStorage.getItem('sitemap_xml');
-  } catch (error) {
-    console.error('Error reading sitemap from localStorage:', error);
-    return null;
-  }
-};
-
-// Create a static sitemap file that can be served directly
-export const createStaticSitemap = async (): Promise<void> => {
-  try {
-    const sitemapXml = await generateSitemap();
-    await saveSitemap(sitemapXml);
-    
-    // Log the XML content for manual file creation
-    console.log('=== COPY THIS CONTENT TO public/sitemap-static.xml ===');
-    console.log(sitemapXml);
-    console.log('=== END OF SITEMAP CONTENT ===');
-    console.log('');
-    console.log('Instructions:');
-    console.log('1. Copy the XML content above');
-    console.log('2. Replace the content in public/sitemap-static.xml');
-    console.log('3. Your sitemap will be available at /sitemap.xml (redirects to /sitemap-static.xml)');
-  } catch (error) {
-    console.error('Error creating static sitemap:', error);
-  }
+export const downloadSitemap = (sitemapXml: string) => {
+  const blob = new Blob([sitemapXml], { type: 'application/xml' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = 'sitemap.xml';
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
 };
