@@ -2,9 +2,5 @@
 # Force sitemap to be served as XML with correct content type
 /sitemap.xml /sitemap.xml 200! Content-Type:application/xml;charset=UTF-8
 
-# Prevent React from handling sitemap requests
-/sitemap /sitemap.xml 301!
-/sitemap/ /sitemap.xml 301!
-
 # Default SPA redirect (must be last)
 /*    /index.html   200
