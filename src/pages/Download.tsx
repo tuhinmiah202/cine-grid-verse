@@ -250,21 +250,6 @@ const Download = () => {
             </div>
           )}
 
-          {/* Bottom Ad Space */}
-          <div className="bg-gray-800 border-2 border-dashed border-gray-600 rounded-lg p-4 text-center mb-4">
-            <p className="text-gray-400">Bottom Advertisement Space</p>
-            <p className="text-sm text-gray-500">728x90 Banner Ad</p>
-          </div>
-
-          {/* Video Ad Space */}
-          <div className="bg-gray-800 border-2 border-dashed border-gray-600 rounded-lg p-6 text-center mb-6">
-            <p className="text-gray-400">Video Advertisement Space</p>
-            <p className="text-sm text-gray-500">300x250 Video Player Ad</p>
-            <div className="bg-gray-700 rounded mt-3 h-32 flex items-center justify-center">
-              <Play className="w-8 h-8 text-gray-500" />
-            </div>
-          </div>
-
           <div className="mt-6 text-xs text-gray-500">
             <p>⚠️ Please ensure you have a stable internet connection</p>
             <p>🎬 Enjoy your movie experience</p>

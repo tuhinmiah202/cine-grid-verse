@@ -258,12 +258,6 @@ const MovieDetails = () => {
                 </div>
               </div>
             )}
-
-            {/* Another Ad Space */}
-            <div className="bg-gray-800 border-2 border-dashed border-gray-600 rounded-lg p-3 text-center">
-              <p className="text-gray-400 text-sm">Advertisement Space</p>
-              <p className="text-xs text-gray-500">300x250 Rectangle Ad</p>
-            </div>
           </div>
         </div>
       </div>
