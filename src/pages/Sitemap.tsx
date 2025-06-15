@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { generateSitemap, getSavedSitemap, createStaticSitemap } from "@/utils/sitemapGenerator";
 
@@ -7,36 +6,6 @@ const Sitemap = () => {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Check if this is a direct XML request
-    const isXmlRequest = window.location.pathname === '/sitemap.xml' ||
-                        window.location.search.includes('format=xml') ||
-                        window.location.search.includes('raw=true');
-
-    if (isXmlRequest) {
-      // For XML requests, immediately serve XML content
-      const serveXml = async () => {
-        try {
-          let sitemap = await getSavedSitemap();
-          if (!sitemap) {
-            sitemap = await generateSitemap();
-          }
-          
-          // Clear the page and serve pure XML
-          document.open();
-          document.write(sitemap || "");
-          document.close();
-        } catch (error) {
-          console.error('Error serving XML:', error);
-          document.open();
-          document.write('<?xml version="1.0" encoding="UTF-8"?><error>Failed to generate sitemap</error>');
-          document.close();
-        }
-      };
-      
-      serveXml();
-      return;
-    }
-
     // For regular UI requests, load sitemap for display
     const loadSitemap = async () => {
       try {
