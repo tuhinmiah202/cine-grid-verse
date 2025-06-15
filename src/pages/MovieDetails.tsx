@@ -322,7 +322,7 @@ const MovieDetails = () => {
           >
             <CarouselContent className="-ml-2">
               {relatedMovies.map((relatedMovie) => (
-                <CarouselItem key={relatedMovie.id} className="pl-2 sm:basis-1/2 md:basis-1/3 lg:basis-1/4 xl:basis-1/5">
+                <CarouselItem key={relatedMovie.id} className="pl-2 basis-3/4 sm:basis-2/5 md:basis-1/3 lg:basis-1/4 xl:basis-1/5">
                   <OptimizedMovieCard movie={relatedMovie} />
                 </CarouselItem>
               ))}
