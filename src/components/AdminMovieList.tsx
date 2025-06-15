@@ -1,11 +1,8 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Movie } from "@/types/Movie";
 import { Trash2, Search } from "lucide-react";
-import { generateSitemap, saveSitemap } from "@/utils/sitemapGenerator";
-import { toast } from "@/hooks/use-toast";
 
 interface AdminMovieListProps {
   movies: Movie[];
@@ -20,18 +17,8 @@ export const AdminMovieList = ({ movies, onDeleteMovie }: AdminMovieListProps) =
     movie.category.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const handleDeleteWithSitemapUpdate = async (id: string) => {
-    // Delete the movie first
+  const handleDelete = (id: string) => {
     onDeleteMovie(id);
-    
-    // Then update sitemap in background
-    try {
-      const sitemapXml = await generateSitemap();
-      await saveSitemap(sitemapXml);
-      console.log('Sitemap updated after movie deletion');
-    } catch (error) {
-      console.error('Error updating sitemap:', error);
-    }
   };
 
   if (movies.length === 0) {
@@ -89,7 +76,7 @@ export const AdminMovieList = ({ movies, onDeleteMovie }: AdminMovieListProps) =
               <Button
                 variant="destructive"
                 size="sm"
-                onClick={() => handleDeleteWithSitemapUpdate(movie.id)}
+                onClick={() => handleDelete(movie.id)}
                 className="flex items-center"
               >
                 <Trash2 className="w-4 h-4 mr-1" />

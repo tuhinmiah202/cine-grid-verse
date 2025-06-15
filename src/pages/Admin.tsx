@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { ArrowLeft, Film, Database, LinkIcon, Map } from "lucide-react";
@@ -103,8 +104,8 @@ const Admin = () => {
       if (error) throw error;
 
       toast({
-        title: "Success",
-        description: "Movie deleted successfully!",
+        title: "Success!",
+        description: "Movie deleted. Remember to regenerate your sitemap.",
       });
 
       loadMovies();
